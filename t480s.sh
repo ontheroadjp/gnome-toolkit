@@ -4,7 +4,7 @@
 # gnome animation
 # gsettings set org.gnome.desktop.interface enable-animations true
 # -----------------------------------------
-gsettings set org.gnome.desktop.interface enable-animations false
+gsettings set org.gnome.desktop.interface enable-animations true
 
 # -----------------------------------------
 # key repeat settings
@@ -63,3 +63,4 @@ echo 85 | sudo tee /sys/class/power_supply/BAT0/charge_stop_threshold
 # sudo systemctl enable --now tlp
 # sudo tlp start
 # sudo tlp-stat -b
+
