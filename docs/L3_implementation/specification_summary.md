@@ -102,3 +102,18 @@ name='Gunome Runcher'
 これはライブシステムの観測結果であり、リポジトリのファイル内容からは
 導出できない（[repository_structure.md](../L1_project/repository_structure.md)
 の未確認事項2を参照）。
+
+## 5. `scripts/battery-alert/` — バッテリー低下通知
+
+oneshot の Python スクリプト（`battery_alert.py`、標準ライブラリのみ）を
+systemd timer が定期実行する構成（常駐プロセスなし）。
+
+| 項目 | 内容 | 根拠 |
+|---|---|---|
+| バッテリー検出 | `/sys/class/power_supply/BAT*` をソートして先頭を採用 | `battery_alert.py` `find_battery_path` |
+| 通知しきい値 | `.env` の `NOTIFY_THRESHOLDS`（カンマ区切り、デフォルト `50`） | `battery_alert.py` `parse_thresholds`、`.env.example` |
+| 通知タイミング | 放電中（`status == "Discharging"`）に各しきい値を初めて下回った時点で1回ずつ通知。充電に戻ると状態ファイルをクリアし、次の放電サイクルで再通知 | `battery_alert.py` `run` / `thresholds_to_notify` / `clear_state` |
+| 状態管理 | `/tmp` 配下の状態ファイル（`battery-alert.state`）に通知済みしきい値を保存 | `battery_alert.py` `STATE_FILE` / `save_notified_thresholds` |
+| ポーリング間隔 | `.env` の `POLL_INTERVAL`（デフォルト `120` 秒）。`battery_alert.py` 自身は読まない。`install.sh` が `battery-alert.timer` テンプレートの `__POLL_INTERVAL__` を置換して `~/.config/systemd/user/` に書き出す | `install.sh`、`.config/systemd/user/battery-alert.timer` |
+| 通知方法 | `notify-send -u critical` | `battery_alert.py` `send_notification` |
+| テスト | `tests/test_battery_alert.py`（`unittest`、19件） | ファイル内容確認済み |

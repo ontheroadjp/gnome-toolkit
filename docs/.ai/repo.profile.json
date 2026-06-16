@@ -26,6 +26,11 @@
       "run": ".local/bin/gnome-overview-toggle",
       "evidence": ".local/bin/gnome-overview-toggle:1 (#!/bin/sh), file mode 755",
       "note": "Designed to be invoked via a keyboard shortcut, not run directly by a human. Currently bound on this machine to Shift+Ctrl+Space via dconf custom-keybindings/custom0 (observed via `dconf dump`, not stored in this repo)."
+    },
+    "install_battery_alert": {
+      "run": "./scripts/battery-alert/install.sh",
+      "evidence": "scripts/battery-alert/install.sh:1 (#!/bin/bash), file mode 755",
+      "note": "Symlinks battery_alert.py and battery-alert.service into ~/.local/bin and ~/.config/systemd/user, and renders battery-alert.timer from .env's POLL_INTERVAL. No sudo required. Re-run after editing .env to refresh the generated timer."
     }
   },
   "primary_docs": {

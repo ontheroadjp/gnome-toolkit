@@ -73,10 +73,37 @@ import = ["~/.config/alacritty/theme/tokyo-night.toml"]
 `live_config_reload = true`（`alacritty.toml:9`）のため、保存すると
 起動中の Alacritty に即時反映される。
 
+## 5. battery-alert のインストール
+
+```bash
+cd scripts/battery-alert
+cp .env.example .env   # 必要に応じてしきい値・ポーリング間隔を編集
+./install.sh
+systemctl --user daemon-reload
+systemctl --user enable --now battery-alert.timer
+```
+
+- `install.sh` は `battery_alert.py` と `battery-alert.service` を
+  `~/.local/bin/`・`~/.config/systemd/user/` へシンボリックリンクし、
+  `.env` の `POLL_INTERVAL` を `battery-alert.timer` のテンプレートに
+  反映して書き出す。`sudo` は不要。
+- `.env` を変更した場合は `install.sh` を再実行しないと
+  `POLL_INTERVAL` が systemd timer に反映されない
+  （`scripts/battery-alert/README.md` 参照）。
+
 ## ビルド・テストについて
 
-ビルドプロセス・テストスイートは存在しない（コンパイル対象や
-テストランナー設定が見つからないため）。動作確認は
-スクリプト実行後に GNOME の実際の挙動を目視で確認する運用と推測される
-（未確認: 目視確認の具体的なチェックリストはリポジトリ内に
+リポジトリ全体としてのビルドプロセス・CIは存在しない（`.github/` 不在を
+確認済み）。`scripts/battery-alert/` には `unittest` ベースのテスト
+（`tests/test_battery_alert.py`）があり、以下で実行できる
+（追加インストール不要、標準ライブラリのみ）。
+
+```bash
+cd scripts/battery-alert
+python3 -m unittest discover -s tests
+```
+
+それ以外のスクリプト（`t480s.sh` 等）にはテストスイートが存在せず、
+動作確認はスクリプト実行後に GNOME の実際の挙動を目視で確認する運用と
+推測される（未確認: 目視確認の具体的なチェックリストはリポジトリ内に
 存在しない）。

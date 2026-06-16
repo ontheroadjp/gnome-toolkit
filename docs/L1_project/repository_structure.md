@@ -14,9 +14,20 @@
 │           ├── tokyo-night.toml          # 配色テーマ（現在アクティブ）
 │           ├── tokyo-night-storm.toml    # 配色テーマ（代替）
 │           └── dracula.toml              # 配色テーマ（代替）
-└── .local/
-    └── bin/
-        └── gnome-overview-toggle         # GNOME Overview トグルスクリプト
+├── .local/
+│   └── bin/
+│       └── gnome-overview-toggle         # GNOME Overview トグルスクリプト
+└── scripts/
+    └── battery-alert/                    # バッテリー低下通知（Python + systemd timer）
+        ├── battery_alert.py
+        ├── .env.example
+        ├── install.sh
+        ├── README.md
+        ├── tests/
+        │   └── test_battery_alert.py
+        └── .config/systemd/user/
+            ├── battery-alert.service
+            └── battery-alert.timer
 ```
 
 (`docs/` は本コマンドにより新規追加。`.git/` は省略)
@@ -52,6 +63,18 @@
 実行可能ビット付き（`rwxrwxr-x`）の POSIX sh スクリプトで、
 `gdbus call` のみで GNOME Shell の Overview 状態をトグルする外部依存のない
 単機能スクリプト。
+
+### `scripts/battery-alert/`
+バッテリー残量低下を `notify-send` で通知する Python 製 oneshot スクリプト
+一式。`battery_alert.py`（標準ライブラリのみ）が `/sys/class/power_supply/BAT*`
+を読み、`.env` の `NOTIFY_THRESHOLDS`（カンマ区切りで複数指定可）のうち
+放電中に下回ったしきい値ごとに1回通知する（充電開始でリセット）。
+定期実行は systemd timer（`.config/systemd/user/battery-alert.timer`）が
+担い、ポーリング間隔（`.env` の `POLL_INTERVAL`）は `battery_alert.py`
+自身ではなく `install.sh` が timer ユニットへ反映する
+（テンプレート `__POLL_INTERVAL__` を実値で置換）。
+`tests/test_battery_alert.py` に `unittest` ベースのテストがある。
+詳細は [scripts/battery-alert/README.md](../../scripts/battery-alert/README.md) 参照。
 
 ## 未確認事項
 
