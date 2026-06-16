@@ -1,0 +1,89 @@
+# ---- for v0.13.0 -------
+#[general]
+# ---- for v0.13.0 -------
+
+import = ["~/.config/alacritty/theme/tokyo-night.toml"]
+#import = ["~/.config/alacritty/theme/dracula.toml"]
+
+#working_directory = "~"
+live_config_reload = true
+
+#[shell]
+#program = "/bin/zsh"
+#args = ["-l", "-c", "tmux attach || tmux"]
+
+[env]
+#TERM = "xterm-256color"
+
+# ========================== FONT(T480s) =========================
+# ------- for T480s ---------
+[font]
+size = 12.0
+offset = { x = 1, y = 6 }
+
+[font.normal]
+family = "monospace" # same as DejaVu Sans Mono
+# family = "Ubunts Sans Mono"
+# family = "PlemolJP Console"
+# family = "Dicty diminished"
+style = "Regular"
+
+[font.bold]
+family = "monospace" # same as DejaVu Sans Mono
+# family = "Ubunts Sans Mono"
+# family = "PlemolJP Console"
+# family = "Dicty diminished"
+style = "Regular"
+
+# ------- for MBP15 ---------
+#[font]
+#size = 18.0
+#offset = { x = 1, y = 12 }
+#normal = { family = "Ricty Diminished", style = "Regular" }
+#bold = {style = "Regular"}
+
+# ========================= WINDOW =========================
+[window]
+# decorations = "buttonless"
+decorations = "None"
+#startup_mode = "SimpleFullscreen"
+startup_mode = "Windowed"
+padding = { x = 5, y = 0 }
+resize_increments = true
+opacity = 1.0
+
+# ========================== COLOR =========================
+[colors]
+#draw_bold_text_with_bright_colors = true
+
+[colors.primary]
+foreground = "#CACFD8"
+background = "#242C43"
+
+[colors.normal]
+# black = "#32344a"
+#white = '#bcbcbc'
+white = '#d0d0d0'
+#green = "#9ece6a"
+#magenta = "#af87ff"
+red = "#ff8787"
+#yellow = '#afaf00'
+yellow = '#ffd700'
+blue = "#87d7ff"
+cyan = "#afd7d7"
+
+[colors.bright]
+black = '#8a8a8a'
+
+[colors.cursor]
+#text = "#282a36"
+cursor = "#f8f8f2"
+
+# ======================= Key bindings =======================
+[keyboard]
+bindings = [
+    { key = "F12", mods = "Control|Shift", action = "ToggleSimpleFullscreen" },
+    { key = "ArrowUp", mods = "Control", action = "IncreaseFontSize" },
+    { key = "ArrowDown", mods = "Control", action = "DecreaseFontSize" },
+]
+
