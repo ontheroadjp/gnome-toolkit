@@ -4,7 +4,7 @@
 # gnome animation
 # gsettings set org.gnome.desktop.interface enable-animations true
 # -----------------------------------------
-gsettings set org.gnome.desktop.interface enable-animations true
+gsettings set org.gnome.desktop.interface enable-animations false
 
 # -----------------------------------------
 # key repeat settings
@@ -19,7 +19,15 @@ gsettings set org.gnome.desktop.peripherals.keyboard repeat-interval 10
 gsettings set org.gnome.desktop.wm.keybindings switch-input-source "['<Control>space']"
 
 # -----------------------------------------
-# window drag witth super to ctrl
+# Change workspace
+# -----------------------------------------
+gsettings set org.gnome.desktop.wm.keybindings switch-to-workspace-1 "['<Control>1']"
+gsettings set org.gnome.desktop.wm.keybindings switch-to-workspace-2 "['<Control>2']"
+gsettings set org.gnome.desktop.wm.keybindings switch-to-workspace-3 "['<Control>3']"
+gsettings set org.gnome.desktop.wm.keybindings switch-to-workspace-4 "['<Control>4']"
+
+# -----------------------------------------
+# window drag with super to ctrl
 # -----------------------------------------
 gsettings set org.gnome.desktop.wm.preferences mouse-button-modifier "'<Ctrl>'"
 
@@ -28,8 +36,8 @@ gsettings set org.gnome.desktop.wm.preferences mouse-button-modifier "'<Ctrl>'"
 # gsettings set org.gnome.desktop.wm.keybindings move-to-side-w "'<Super>Left'"
 # gsettings set org.gnome.desktop.wm.keybindings move-to-side-e "'<Super>Right'"
 # -----------------------------------------
-gsettings set org.gnome.desktop.wm.keybindings move-to-side-w "['<Ctrl>Left']"
-gsettings set org.gnome.desktop.wm.keybindings move-to-side-e "['<Ctrl>Right']"
+# gsettings set org.gnome.desktop.wm.keybindings move-to-side-w "['<Ctrl>Left']"
+# gsettings set org.gnome.desktop.wm.keybindings move-to-side-e "['<Ctrl>Right']"
 
 # -----------------------------------------
 # font
