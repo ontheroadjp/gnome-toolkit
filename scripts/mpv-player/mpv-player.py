@@ -101,14 +101,29 @@ def select_media_with_fzf(paths: list[Path], music_dir: Path = MUSIC_DIR) -> lis
     ]
 
 
-def filter_media_by_query(paths: list[Path], query: str, music_dir: Path = MUSIC_DIR) -> list[Path]:
-    normalized_query = query.casefold()
-    if not normalized_query:
+def select_filtered_media_with_fzf(
+    paths: list[Path], music_dir: Path = MUSIC_DIR
+) -> list[Path]:
+    result = subprocess.run(
+        [
+            "fzf",
+            "--multi",
+            "--prompt",
+            "search> ",
+            "--bind",
+            "enter:select-all+accept",
+        ],
+        input=format_media_choices(paths, music_dir),
+        text=True,
+        stdout=subprocess.PIPE,
+        check=False,
+    )
+    if result.returncode != 0 or not result.stdout.strip():
         return []
     return [
-        path
-        for path in paths
-        if normalized_query in display_path(path, music_dir).casefold()
+        resolve_display_path(line, music_dir)
+        for line in result.stdout.splitlines()
+        if line.strip()
     ]
 
 
@@ -183,8 +198,7 @@ def create_playlist_from_search() -> bool:
     if not media_files:
         print(f"メディアファイルが見つかりません: {MUSIC_DIR}", file=sys.stderr)
         return False
-    query = input("検索語: ").strip()
-    matched = filter_media_by_query(media_files, query)
+    matched = select_filtered_media_with_fzf(media_files)
     if not matched:
         print("検索結果がありません。", file=sys.stderr)
         return False

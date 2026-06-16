@@ -44,18 +44,21 @@ class TestMpvPlayer(unittest.TestCase):
                 ],
             )
 
-    def test_filter_media_by_query_matches_relative_path_case_insensitively(
-        self,
-    ) -> None:
+    def test_select_filtered_media_with_fzf_returns_filtered_paths(self) -> None:
         music_dir = Path("music")
-        paths = [
-            music_dir / "Albums" / "Blue Song.mp3",
-            music_dir / "Movies" / "clip.mp4",
-        ]
+        paths = [music_dir / "a.mp3", music_dir / "nested" / "b.mp4"]
+        completed = subprocess.CompletedProcess(
+            args=["fzf"], returncode=0, stdout="a.mp3\nnested/b.mp4\n"
+        )
 
-        result = mpv_player.filter_media_by_query(paths, "blue", music_dir)
+        with patch.object(mpv_player.subprocess, "run", return_value=completed) as mock_run:
+            result = mpv_player.select_filtered_media_with_fzf(paths, music_dir)
 
-        self.assertEqual(result, [music_dir / "Albums" / "Blue Song.mp3"])
+        mock_run.assert_called_once()
+        command = mock_run.call_args.args[0]
+        self.assertIn("--bind", command)
+        self.assertIn("enter:select-all+accept", command)
+        self.assertEqual(result, [music_dir / "a.mp3", music_dir / "nested" / "b.mp4"])
 
     def test_write_playlist_creates_parent_and_m3u_file(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:

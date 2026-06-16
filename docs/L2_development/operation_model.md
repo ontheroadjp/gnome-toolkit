@@ -101,7 +101,8 @@ music
 - `install.sh` は `scripts/mpv-player/mpv-player.py` を
   `~/.local/bin/music` へシンボリックリンクする。`sudo` は不要。
 - `music` は起動時に main menu を表示し、`~/Music` 配下の音声/動画ファイル
-  から playlist を作成する。
+  から playlist を作成する。メニュー 2 では fzf で絞り込まれた候補全件を
+  playlist に入れる。
 - playlist は `~/Music/playlist/mpv-player.m3u` に上書き保存される。
 - 再生は `mpv --no-video` で実行される。
 
