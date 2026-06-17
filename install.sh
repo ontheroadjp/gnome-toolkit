@@ -3,15 +3,20 @@
 CORE_TOOLKIT_FOR_GNOME_PATH="$(ghq root)/github.com/ontheroadjp/core-toolkit-for-gnome"
 
 # ----------------------------------
+# keyd
+# ----------------------------------
+sudo ln -sf ${CORE_TOOLKIT_FOR_GNOME_PATH}/root/etc/keyd /etc
+
+# ----------------------------------
 # alacritty
 # ----------------------------------
 ln -sf ${CORE_TOOLKIT_FOR_GNOME_PATH}/root/home/user/.local/share/applications/Alacritty.desktop $HOME/.local/share/applications
 ln -sf ${CORE_TOOLKIT_FOR_GNOME_PATH}/root/home/user/.config/alacritty $HOME/.config
 
 # ----------------------------------
-# keyd
+# mpv
 # ----------------------------------
-sudo ln -sf ${CORE_TOOLKIT_FOR_GNOME_PATH}/root/etc/keyd /etc
+ln -sf ${CORE_TOOLKIT_FOR_GNOME_PATH}/root/home/user/.config/mpv $HOME/.config
 
 # ----------------------------------
 # settings > keyboard > custom shortcuts
