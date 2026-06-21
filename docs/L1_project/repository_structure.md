@@ -84,13 +84,13 @@
 詳細は [scripts/battery-alert/README.md](../../scripts/battery-alert/README.md) 参照。
 
 ### `scripts/tmux-switch-us-input/`
-tmux の `pane-focus-in` フックから呼び出されることを想定した単機能スクリプト。
+tmux の `after-select-pane` フックから呼び出されることを想定した単機能スクリプト。
 `ibus engine xkb:us::eng` を実行し、IBus の入力ソースを US キーボードに切り替える。
 `install.sh` が `~/.local/bin/switch-input-to-us` へシンボリックリンクを作成する。
 `~/.tmux.conf` への以下の行追記はユーザーが手動で行う:
 
 ```
-set-hook -g pane-focus-in 'run-shell "switch-input-to-us"'
+set-hook -g after-select-pane 'run-shell "switch-input-to-us"'
 ```
 
 ### `scripts/mpv-player/`
