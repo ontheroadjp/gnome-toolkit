@@ -1,0 +1,10 @@
+matches:
+  - trigger: '<<div'
+    replace: '<div>$|$</div>'
+
+  - trigger: '""class'
+    replace: 'class="$|$"'
+
+  - trigger: '""style'
+    replace: 'style="$|$"'
+

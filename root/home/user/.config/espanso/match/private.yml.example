@@ -1,0 +1,4 @@
+matches:
+  - trigger: "::mail"
+    replace: "your-email@example.com"
+

@@ -1,3 +1,5 @@
 .claude/
 .env
 __pycache__/
+
+root/home/user/.config/espanso/match/private.yml
