@@ -53,23 +53,25 @@ export default class FocusUsInputExtension extends Extension {
         this._idleId = 0;
         this._scheduleSwitch();
 
-        this._dbusId = Gio.DBus.session.own_name(
-            'org.gnome.Shell.Extensions.FocusUsInput',
-            Gio.BusNameOwnerFlags.NONE,
-            null, null
-        );
         this._dbusImpl = Gio.DBusExportedObject.wrapJSObject(DBUS_IFACE, this);
         this._dbusImpl.export(Gio.DBus.session, '/org/gnome/Shell/Extensions/FocusUsInput');
+        this._ownerId = Gio.bus_own_name_on_connection(
+            Gio.DBus.session,
+            'org.gnome.Shell.Extensions.FocusUsInput',
+            Gio.BusNameOwnerFlags.NONE,
+            () => {},
+            () => {}
+        );
     }
 
     disable() {
+        if (this._ownerId) {
+            Gio.bus_unown_name(this._ownerId);
+            this._ownerId = 0;
+        }
         if (this._dbusImpl) {
             this._dbusImpl.unexport();
             this._dbusImpl = null;
-        }
-        if (this._dbusId) {
-            Gio.DBus.session.unown_name(this._dbusId);
-            this._dbusId = 0;
         }
         if (this._focusChangedId) {
             global.display.disconnect(this._focusChangedId);

@@ -5,4 +5,4 @@ gdbus call --session \
     --dest org.gnome.Shell.Extensions.FocusUsInput \
     --object-path /org/gnome/Shell/Extensions/FocusUsInput \
     --method org.gnome.Shell.Extensions.FocusUsInput.SwitchToUs \
-    2>/dev/null
+    >/dev/null 2>&1
