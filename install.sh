@@ -41,7 +41,7 @@ cat <<'EOF'
 === Manual step: ~/.tmux.conf ===
 Add the following line to enable auto-switch to US input on pane focus:
 
-  set-hook -g pane-focus-in 'run-shell "switch-input-to-us"'
+  set-hook -g after-select-pane 'run-shell "switch-input-to-us"'
 
 EOF
 
