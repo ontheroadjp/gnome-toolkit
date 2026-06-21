@@ -28,11 +28,13 @@
     │   └── .config/systemd/user/
     │       ├── battery-alert.service
     │       └── battery-alert.timer
-    └── mpv-player/                       # mpv music launcher（Python）
-        ├── mpv-player.py
-        ├── install.sh
-        └── tests/
-            └── test_mpv_player.py
+    ├── mpv-player/                       # mpv music launcher（Python）
+    │   ├── mpv-player.py
+    │   ├── install.sh
+    │   └── tests/
+    │       └── test_mpv_player.py
+    └── tmux-switch-us-input/             # tmux pane フォーカス時に IBus を US 切替
+        └── switch-input-to-us
 ```
 
 (`docs/` は本コマンドにより新規追加。`.git/` は省略)
@@ -80,6 +82,16 @@
 （テンプレート `__POLL_INTERVAL__` を実値で置換）。
 `tests/test_battery_alert.py` に `unittest` ベースのテストがある。
 詳細は [scripts/battery-alert/README.md](../../scripts/battery-alert/README.md) 参照。
+
+### `scripts/tmux-switch-us-input/`
+tmux の `pane-focus-in` フックから呼び出されることを想定した単機能スクリプト。
+`ibus engine xkb:us::eng` を実行し、IBus の入力ソースを US キーボードに切り替える。
+`install.sh` が `~/.local/bin/switch-input-to-us` へシンボリックリンクを作成する。
+`~/.tmux.conf` への以下の行追記はユーザーが手動で行う:
+
+```
+set-hook -g pane-focus-in 'run-shell "switch-input-to-us"'
+```
 
 ### `scripts/mpv-player/`
 `~/Music` 配下の音声/動画ファイルを検索し、`mpv --no-video` で再生する

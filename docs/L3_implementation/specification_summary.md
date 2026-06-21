@@ -134,7 +134,19 @@ main menu を表示する。対象ディレクトリは `~/Music`、playlist の
 | インストール | `~/.local/bin/music` を `mpv-player.py` へのシンボリックリンクとして作成 | `install.sh` |
 | テスト | `tests/test_mpv_player.py`（`unittest`、9件） | ファイル内容確認済み |
 
-## 7. `scripts/voice-input/` — オフライン音声入力
+## 7. `scripts/tmux-switch-us-input/` — tmux pane フォーカス時 US 入力切替
+
+`switch-input-to-us` は1コマンドのみの bash スクリプト。
+
+| 項目 | 内容 | 根拠 |
+|---|---|---|
+| 実行内容 | `ibus engine xkb:us::eng` を実行して IBus 入力ソースを US に切替 | `switch-input-to-us:4` |
+| 前提 | IBus が起動済みで `xkb:us::eng` エンジンが利用可能なこと | スクリプト冒頭コメント |
+| エラー処理 | `2>/dev/null` で stderr を抑制（IBus 未起動時も静かに失敗） | `switch-input-to-us:4` |
+| インストール | `install.sh` が `~/.local/bin/switch-input-to-us` へシンボリックリンクを作成 | `install.sh` tmux-switch-us-input セクション |
+| tmux 連携 | `~/.tmux.conf` に `set-hook -g pane-focus-in 'run-shell "switch-input-to-us"'` をユーザーが手動追記 | install.sh の Manual steps 表示 |
+
+## 8. `scripts/voice-input/` — オフライン音声入力
 
 GNOME カスタムショートカット（`Ctrl+Shift+=`）で録音をトグルし、
 whisper.cpp で文字起こしした結果を Wayland クリップボードにコピーする。

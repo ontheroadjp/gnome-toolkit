@@ -1,0 +1,4 @@
+#!/bin/bash
+# Switch IBus input source to US keyboard when tmux pane focus changes.
+# Requires IBus with xkb:us::eng engine available.
+ibus engine xkb:us::eng 2>/dev/null

@@ -28,4 +28,21 @@ gsettings set org.gnome.settings-daemon.plugins.media-keys.custom-keybinding:/or
 gsettings set org.gnome.settings-daemon.plugins.media-keys.custom-keybinding:/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom0/ command "${GNOME_OVERVIEW_TOGGLE_PATH}"
 gsettings set org.gnome.settings-daemon.plugins.media-keys.custom-keybinding:/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom0/ binding '<Control><Shift>space'
 
+# ----------------------------------
+# tmux-switch-us-input
+# ----------------------------------
+ln -sf ${CORE_TOOLKIT_FOR_GNOME_PATH}/scripts/tmux-switch-us-input/switch-input-to-us ${HOME}/.local/bin/switch-input-to-us
+
+# ----------------------------------
+# Manual steps
+# ----------------------------------
+cat <<'EOF'
+
+=== Manual step: ~/.tmux.conf ===
+Add the following line to enable auto-switch to US input on pane focus:
+
+  set-hook -g pane-focus-in 'run-shell "switch-input-to-us"'
+
+EOF
+
 exit 0
