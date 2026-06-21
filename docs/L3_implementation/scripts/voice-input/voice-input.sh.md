@@ -1,53 +1,61 @@
 ---
 name: voice-input-sh
-description: Toggle-record → whisper.cpp transcribe → wl-copy script for GNOME voice input
+description: Toggle recording, request persistent whisper.cpp transcription, and copy the result
 metadata:
   type: project
 ---
 
 ## 目的・役割
 
-GNOME カスタムショートカットから呼ばれ、音声入力をクリップボードに届けるメインスクリプト。
-録音の開始・停止・文字起こし・クリップボードコピーを1ファイルで完結させる。
+GNOMEカスタムショートカットから呼ばれ、録音の開始・停止と文字起こし結果の
+クリップボードコピーを行う。モデル推論は常駐する `whisper-server` に委譲する。
 
-## 動作の概要
+## 動作概要
 
-```
-voice-input.sh toggle
-  ├─ PID ファイルなし / プロセス死亡 → _start_recording
-  │    arecord (16kHz mono WAV) をバックグラウンド起動 → PID を /tmp/voice-input.pid に保存
-  └─ PID ファイルあり / プロセス生存 → _stop_and_transcribe
-       kill arecord → whisper-cli 実行 → wl-copy → notify-send
-```
+`toggle` はPIDファイルの録音プロセスが生存していれば停止処理へ、そうでなければ
+録音開始へ分岐する（`voice-input.sh:84-95`）。録音は16kHz、モノラル、S16_LEの
+WAVとして保存する（`voice-input.sh:31-37`）。
 
-各フェーズで `notify-send` が通知を出す（Recording… / Transcribing… / Copied to clipboard）。
+停止時は録音プロセスを終了し、モデルと録音ファイルの存在を確認してから、
+`curl` のmultipartリクエストで `whisper-server` の `/inference` へ送る
+（`voice-input.sh:39-71`）。レスポンスを1行に整形し、空でなければ `wl-copy` へ
+渡す（`voice-input.sh:72-81`）。
 
-## 主要な定数（ファイル先頭）
+## 主要設定
 
-| 定数 | 値 | 意味 |
-|------|----|------|
-| `WHISPER_BIN_DIR` | `~/.local/lib/whisper.cpp/build/bin` | install.sh のビルド出力先 |
-| `WHISPER_MODEL` | `~/.local/share/whisper-models/ggml-base.bin` | デフォルトモデル |
-| `RECORD_FILE` | `/tmp/voice-input-record.wav` | 録音一時ファイル |
-| `PID_FILE` | `/tmp/voice-input.pid` | 録音プロセスの PID |
-| `ARECORD_RATE` | `16000` | whisper.cpp が要求するサンプリングレート |
+| 設定 | 既定値 | 用途 |
+|---|---|---|
+| `VOICE_INPUT_LANGUAGE` | `ja` | 文字起こし言語 |
+| `VOICE_INPUT_SERVER_URL` | `http://127.0.0.1:8178/inference` | 常駐サーバーAPI |
+| `VOICE_INPUT_RECORD_FILE` | `/tmp/voice-input-record.wav` | 録音ファイル |
+| `VOICE_INPUT_PID_FILE` | `/tmp/voice-input.pid` | 録音プロセスPID |
+| `VOICE_INPUT_NOTIFICATION_ID_FILE` | `/tmp/voice-input-notification.id` | 置換対象の通知ID |
+
+環境変数による一時ファイルの上書きは、通常利用時の既定動作を保ちながら統合テストを
+隔離するために使う（`voice-input.sh:4-9`）。
 
 ## 重要な設計判断
 
-- **自動ペーストしない**: `ydotool` はデーモン起動が必要で Wayland 上で不安定なため、クリップボードへのコピーのみ行い Ctrl+V はユーザーに委ねる。
-- **`_whisper_bin()` で新旧両対応**: whisper.cpp はバージョンによりバイナリ名が `whisper-cli`（新）/ `main`（旧）と異なるため、両方を検索して最初に見つかったものを使う（`voice-input.sh:17-25`）。
-- **transcribe 出力フィルタ**: `grep -v '^\['` で `[BLANK_AUDIO]` 等の特殊トークン行を除去、`tr '\n' ' '` で複数行を1行に結合（`voice-input.sh:71`）。
+- モデルをリクエストごとに読み込まないため、CLI直接実行ではなくlocalhostの
+  常駐サーバーを利用する（`voice-input.sh:61-71`）。
+- 通知IDを保存し、録音中・処理中・完了通知を同一通知として置換する
+  （`voice-input.sh:15-29`）。
+- 自動ペーストは行わず、Waylandクリップボードへのコピーまでを責務とする
+  （`voice-input.sh:79-80`）。
 
 ## 統合ポイント
 
-- **呼び出し元**: GNOME カスタムショートカット（`install.sh` が登録）
-- **依存コマンド**: `arecord`（alsa-utils）、`wl-copy`（wl-clipboard）、`notify-send`（libnotify）、whisper-cli（install.sh でビルド）
+- 呼び出し元: `install.sh` が登録するGNOMEカスタムショートカット
+- 呼び出し先: `voice-input-whisper.service` の `whisper-server`
+- 外部コマンド: `arecord`、`curl`、`wl-copy`、`notify-send`
 
-## 注意事項
+## 注意事項・既知の制限
 
-- モデルを変える場合は `WHISPER_MODEL` の値を変更する（`ggml-small.bin` 等）
-- `--language auto` で日英自動判定。特定言語に固定したい場合は `--language ja` 等に変更
+- サーバー停止時は文字起こしを失敗として通知し、CLIへのフォールバックは行わない
+  （`voice-input.sh:62-70`）。
+- 音声認識結果はクリップボードへコピーされるため、貼り付け操作は利用者が行う。
 
 ## 変更履歴（git log より自動生成）
 
+- d3925f3 feat(#17): keep whisper model loaded for voice input
 - adb6559 feat(#6): add whisper.cpp-based voice input script for GNOME

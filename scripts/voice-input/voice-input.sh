@@ -1,26 +1,30 @@
 #!/bin/bash
 # voice-input.sh — Toggle-record → whisper.cpp transcribe → wl-copy
 
-WHISPER_BIN_DIR="${HOME}/.local/lib/whisper.cpp/build/bin"
 WHISPER_MODEL="${HOME}/.local/share/whisper-models/ggml-base.bin"
-RECORD_FILE="/tmp/voice-input-record.wav"
-PID_FILE="/tmp/voice-input.pid"
+WHISPER_LANGUAGE="${VOICE_INPUT_LANGUAGE:-ja}"
+WHISPER_SERVER_URL="${VOICE_INPUT_SERVER_URL:-http://127.0.0.1:8178/inference}"
+RECORD_FILE="${VOICE_INPUT_RECORD_FILE:-/tmp/voice-input-record.wav}"
+PID_FILE="${VOICE_INPUT_PID_FILE:-/tmp/voice-input.pid}"
+NOTIFICATION_ID_FILE="${VOICE_INPUT_NOTIFICATION_ID_FILE:-/tmp/voice-input-notification.id}"
 ARECORD_RATE=16000
 ARECORD_CHANNELS=1
 ARECORD_FORMAT="S16_LE"
 NOTIFICATION_APP="Voice Input"
 
 _notify() {
-    notify-send -a "$NOTIFICATION_APP" "$1" "$2"
-}
+    local notification_id new_notification_id
+    notification_id=$(cat "$NOTIFICATION_ID_FILE" 2>/dev/null)
 
-_whisper_bin() {
-    if [ -x "${WHISPER_BIN_DIR}/whisper-cli" ]; then
-        echo "${WHISPER_BIN_DIR}/whisper-cli"
-    elif [ -x "${WHISPER_BIN_DIR}/main" ]; then
-        echo "${WHISPER_BIN_DIR}/main"
+    if [[ "$notification_id" =~ ^[0-9]+$ ]]; then
+        new_notification_id=$(notify-send -p -r "$notification_id" \
+            -a "$NOTIFICATION_APP" "$1" "$2")
     else
-        echo ""
+        new_notification_id=$(notify-send -p -a "$NOTIFICATION_APP" "$1" "$2")
+    fi
+
+    if [[ "$new_notification_id" =~ ^[0-9]+$ ]]; then
+        echo "$new_notification_id" > "$NOTIFICATION_ID_FILE"
     fi
 }
 
@@ -47,13 +51,6 @@ _stop_and_transcribe() {
         exit 1
     fi
 
-    local whisper_bin
-    whisper_bin=$(_whisper_bin)
-    if [ -z "$whisper_bin" ]; then
-        _notify "Error" "whisper-cli not found. Run install.sh first."
-        exit 1
-    fi
-
     if [ ! -f "$WHISPER_MODEL" ]; then
         _notify "Error" "Model not found: $WHISPER_MODEL"
         exit 1
@@ -61,14 +58,18 @@ _stop_and_transcribe() {
 
     _notify "Transcribing..." ""
 
-    local result
-    result=$("$whisper_bin" \
-        --model "$WHISPER_MODEL" \
-        --language auto \
-        --no-timestamps \
-        --no-prints \
-        --file "$RECORD_FILE" \
-        2>/dev/null | grep -v '^\[' | sed 's/^[[:space:]]*//' | tr '\n' ' ' | sed 's/[[:space:]]*$//')
+    local raw_result result
+    if ! raw_result=$(curl --fail --silent --show-error \
+        --form "file=@${RECORD_FILE};type=audio/wav" \
+        --form "language=${WHISPER_LANGUAGE}" \
+        --form "best_of=1" \
+        --form "no_timestamps=true" \
+        --form "response_format=text" \
+        "$WHISPER_SERVER_URL"); then
+        _notify "Error" "Transcription server is unavailable. Run install.sh."
+        exit 1
+    fi
+    result=$(printf '%s' "$raw_result" | grep -v '^\[' | sed 's/^[[:space:]]*//' | tr '\n' ' ' | sed 's/[[:space:]]*$//')
 
     if [ -z "$result" ]; then
         _notify "Done" "(empty — nothing recognized)"

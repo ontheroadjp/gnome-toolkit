@@ -5,29 +5,33 @@ set -euo pipefail
 
 REPO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 WHISPER_INSTALL_DIR="${HOME}/.local/lib/whisper.cpp"
+WHISPER_SERVER_BIN="${WHISPER_INSTALL_DIR}/build/bin/whisper-server"
 MODEL_DIR="${HOME}/.local/share/whisper-models"
 MODEL_FILE="${MODEL_DIR}/ggml-base.bin"
 MODEL_URL="https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-base.bin"
 VOICE_INPUT_SCRIPT="${REPO_DIR}/voice-input.sh"
+SERVICE_SOURCE="${REPO_DIR}/.config/systemd/user/voice-input-whisper.service"
+SYSTEMD_USER_DIR="${HOME}/.config/systemd/user"
 SHORTCUT_BINDING="<Control><Shift>equal"
 SHORTCUT_NAME="Voice Input"
 DCONF_BASE="/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings"
 
 _check_deps() {
     local missing=()
-    for cmd in git cmake make gcc arecord wl-copy notify-send; do
+    for cmd in git cmake make gcc arecord curl wl-copy notify-send systemctl; do
         command -v "$cmd" &>/dev/null || missing+=("$cmd")
     done
     if [ ${#missing[@]} -gt 0 ]; then
         echo "ERROR: Missing dependencies: ${missing[*]}" >&2
-        echo "Install with: sudo apt install build-essential cmake libasound2-dev wl-clipboard libnotify-bin git" >&2
+        echo "Install with: sudo apt install build-essential cmake libasound2-dev curl wl-clipboard libnotify-bin git" >&2
         exit 1
     fi
 }
 
 _build_whisper() {
-    if [ -x "${WHISPER_INSTALL_DIR}/build/bin/whisper-cli" ] || \
-       [ -x "${WHISPER_INSTALL_DIR}/build/bin/main" ]; then
+    if { [ -x "${WHISPER_INSTALL_DIR}/build/bin/whisper-cli" ] || \
+         [ -x "${WHISPER_INSTALL_DIR}/build/bin/main" ]; } && \
+       [ -x "$WHISPER_SERVER_BIN" ]; then
         echo "whisper.cpp already built, skipping."
         return
     fi
@@ -44,6 +48,14 @@ _build_whisper() {
         -DCMAKE_BUILD_TYPE=Release -DWHISPER_BUILD_EXAMPLES=ON
     cmake --build "${WHISPER_INSTALL_DIR}/build" --config Release -j"$(nproc)"
     echo "Build complete."
+}
+
+_install_whisper_service() {
+    mkdir -p "$SYSTEMD_USER_DIR"
+    ln -sf "$SERVICE_SOURCE" "$SYSTEMD_USER_DIR/voice-input-whisper.service"
+    systemctl --user daemon-reload
+    systemctl --user enable --now voice-input-whisper.service
+    echo "Whisper server service enabled and started."
 }
 
 _download_model() {
@@ -111,6 +123,9 @@ _build_whisper
 echo "==> Downloading model..."
 _download_model
 
+echo "==> Installing whisper server service..."
+_install_whisper_service
+
 echo "==> Registering GNOME shortcut..."
 _register_gnome_shortcut
 
@@ -119,6 +134,8 @@ echo "Installation complete."
 echo "  Shortcut : Ctrl+Shift+= (${SHORTCUT_BINDING})"
 echo "  Script   : ${VOICE_INPUT_SCRIPT}"
 echo "  Model    : ${MODEL_FILE}"
+echo "  Service  : voice-input-whisper.service"
 echo ""
 echo "Usage: Press Ctrl+Shift+= to start recording, press again to stop and transcribe."
 echo "       Result is copied to clipboard — press Ctrl+V to paste."
+echo "       Set VOICE_INPUT_LANGUAGE=auto to enable language detection (slower)."

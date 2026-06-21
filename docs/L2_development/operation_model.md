@@ -106,12 +106,25 @@ music
 - playlist は `~/Music/playlist/mpv-player.m3u` に上書き保存される。
 - 再生は `mpv --no-video` で実行される。
 
+## 7. voice input のインストールと実行
+
+```bash
+scripts/voice-input/install.sh
+systemctl --user status voice-input-whisper.service
+```
+
+- インストーラーはwhisper.cppとbaseモデルを配置し、
+  `voice-input-whisper.service` をenable/startしてからGNOMEショートカットを登録する。
+  sudoは不要だが、初回のビルドとモデル取得にはネットワーク接続が必要。
+- サービスは `127.0.0.1:8178` のみにbindし、モデルをメモリへ常駐させる。
+- `Ctrl+Shift+=` で録音を開始・停止し、完了後に `Ctrl+V` で結果を貼り付ける。
+- サービス停止時はCLIへフォールバックせず、文字起こし失敗の通知を表示する。
+
 ## ビルド・テストについて
 
 リポジトリ全体としてのビルドプロセス・CIは存在しない（`.github/` 不在を
 確認済み）。`scripts/battery-alert/` と `scripts/mpv-player/` には
-`unittest` ベースのテストがあり、以下で実行できる
-（追加インストール不要、標準ライブラリのみ）。
+`unittest` ベースのテストがあり、`scripts/voice-input/` にはBash統合テストがある。
 
 ```bash
 cd scripts/battery-alert
@@ -119,6 +132,9 @@ python3 -m unittest discover -s tests
 
 cd ../../scripts/mpv-player
 python3 -m unittest discover -s tests
+
+cd ../voice-input
+tests/test_voice_input.sh
 ```
 
 それ以外のスクリプト（`t480s.sh` 等）にはテストスイートが存在せず、

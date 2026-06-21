@@ -1,0 +1,13 @@
+[Unit]
+Description=Persistent whisper.cpp server for Voice Input
+
+[Service]
+Type=simple
+ExecStart=%h/.local/lib/whisper.cpp/build/bin/whisper-server --model %h/.local/share/whisper-models/ggml-base.bin --host 127.0.0.1 --port 8178 --language ja --best-of 1 --no-fallback --no-timestamps
+Restart=on-failure
+RestartSec=2
+NoNewPrivileges=true
+PrivateTmp=true
+
+[Install]
+WantedBy=default.target
