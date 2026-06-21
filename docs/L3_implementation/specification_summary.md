@@ -144,7 +144,7 @@ main menu を表示する。対象ディレクトリは `~/Music`、playlist の
 | 前提 | IBus が起動済みで `xkb:us::eng` エンジンが利用可能なこと | スクリプト冒頭コメント |
 | エラー処理 | `2>/dev/null` で stderr を抑制（IBus 未起動時も静かに失敗） | `switch-input-to-us:4` |
 | インストール | `install.sh` が `~/.local/bin/switch-input-to-us` へシンボリックリンクを作成 | `install.sh` tmux-switch-us-input セクション |
-| tmux 連携 | `~/.tmux.conf` に `set-hook -g pane-focus-in 'run-shell "switch-input-to-us"'` をユーザーが手動追記 | install.sh の Manual steps 表示 |
+| tmux 連携 | `~/.tmux.conf` に `set-hook -g after-select-pane 'run-shell "switch-input-to-us"'` をユーザーが手動追記 | install.sh の Manual steps 表示 |
 
 ## 8. `scripts/voice-input/` — オフライン音声入力
 
