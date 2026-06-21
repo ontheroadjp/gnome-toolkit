@@ -133,3 +133,20 @@ main menu を表示する。対象ディレクトリは `~/Music`、playlist の
 | 再生方法 | `mpv --no-video --playlist=<playlist>` を実行。リピートは `--loop-playlist=inf`、ランダムは `--shuffle` を追加 | `mpv-player.py` `build_mpv_command` / `play_playlist` |
 | インストール | `~/.local/bin/music` を `mpv-player.py` へのシンボリックリンクとして作成 | `install.sh` |
 | テスト | `tests/test_mpv_player.py`（`unittest`、9件） | ファイル内容確認済み |
+
+## 7. `scripts/voice-input/` — オフライン音声入力
+
+GNOME カスタムショートカット（`Ctrl+Shift+=`）で録音をトグルし、
+whisper.cpp で文字起こしした結果を Wayland クリップボードにコピーする。
+
+| 項目 | 内容 | 根拠 |
+|---|---|---|
+| 録音 | `arecord -f S16_LE -r 16000 -c 1` で 16kHz モノラル WAV を `/tmp/voice-input-record.wav` に保存 | `voice-input.sh` `_start_recording` |
+| トグル管理 | `/tmp/voice-input.pid` に録音プロセスの PID を保存。toggle 呼び出し時に PID の生死で start/stop を切り替え | `voice-input.sh` `_toggle` |
+| 文字起こし | `whisper-cli`（新）または `main`（旧）を自動検出して実行。`--language auto` で日英自動判定 | `voice-input.sh` `_whisper_bin` / `_stop_and_transcribe` |
+| 出力フィルタ | `grep -v '^\['` で特殊トークン行を除去、複数行を空白で結合 | `voice-input.sh:71` |
+| クリップボード | `wl-copy` に渡す（Wayland 環境）。自動ペーストは行わない | `voice-input.sh` `_stop_and_transcribe` |
+| 通知 | `notify-send` で録音中・文字起こし中・完了をフィードバック | `voice-input.sh` `_notify` |
+| ビルド先 | `~/.local/lib/whisper.cpp/build/bin/` | `install.sh` `_build_whisper` |
+| モデル | `~/.local/share/whisper-models/ggml-base.bin`（~142MB）を HuggingFace から取得 | `install.sh` `_download_model` |
+| ショートカット登録 | `gsettings` で次の空き custom スロットに登録。`voice-input.sh` が既登録ならスキップ（冪等） | `install.sh` `_register_gnome_shortcut` |
