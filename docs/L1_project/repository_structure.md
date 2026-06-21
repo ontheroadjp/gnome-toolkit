@@ -46,8 +46,13 @@
     ├── app-switch-us-input/              # ウィンドウフォーカス時 US 切替クライアント
     │   ├── extension.js
     │   └── metadata.json
-    └── tmux-switch-us-input/             # tmux pane 切替時 US 切替クライアント
-        └── switch-input-to-us
+    ├── tmux-switch-us-input/             # tmux pane 切替時 US 切替クライアント
+    │   └── switch-input-to-us
+    └── vim-switch-us-input/              # Vim Insert mode 終了時 US 切替クライアント
+        ├── plugin/
+        │   └── vim-switch-us-input.vim
+        └── tests/
+            └── test-vim-switch-us-input.sh
 ```
 
 (`docs/` は本コマンドにより新規追加。`.git/` は省略)
@@ -118,6 +123,13 @@ tmux pane 切替クライアントのシェルスクリプト。
 ```
 set-hook -g after-select-pane 'run-shell "switch-input-to-us"'
 ```
+
+### `scripts/vim-switch-us-input/`
+Vim Insert mode 終了イベントのクライアント plugin。
+`InsertLeave` autocmd から `dbus-send` を非同期実行し、D-Bus 経由で
+`fep-switcher@local` の `SwitchToUs()` を直接呼び出す。
+vim-plug ではリポジトリの runtime path を `scripts/vim-switch-us-input` に指定する。
+`tests/test-vim-switch-us-input.sh` が偽の `dbus-send` を使って呼び出し引数を検証する。
 
 ### `scripts/mpv-player/`
 `~/Music` 配下の音声/動画ファイルを検索し、`mpv --no-video` で再生する

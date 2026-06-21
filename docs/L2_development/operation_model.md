@@ -120,11 +120,26 @@ systemctl --user status voice-input-whisper.service
 - `Ctrl+Shift+=` で録音を開始・停止し、完了後に `Ctrl+V` で結果を貼り付ける。
 - サービス停止時はCLIへフォールバックせず、文字起こし失敗の通知を表示する。
 
+## 8. Vim Insert mode 終了時の入力ソース切替
+
+vim-plug を使用する場合、`~/.vimrc` の `plug#begin()` と `plug#end()` の間に
+以下を追加し、`:PlugInstall` を実行する。
+
+```vim
+Plug 'ontheroadjp/core-toolkit-for-gnome', { 'rtp': 'scripts/vim-switch-us-input' }
+```
+
+- Vim の `InsertLeave` 発火時に `dbus-send` をバックグラウンド実行する。
+- session bus 上の `fep-switcher@local.SwitchToUs()` を直接呼び出し、
+  tmux 用クライアントには依存しない。
+- `+job` 対応 Vim、`dbus-send`、有効な `fep-switcher@local` が必要。
+
 ## ビルド・テストについて
 
 リポジトリ全体としてのビルドプロセス・CIは存在しない（`.github/` 不在を
 確認済み）。`scripts/battery-alert/` と `scripts/mpv-player/` には
-`unittest` ベースのテストがあり、`scripts/voice-input/` にはBash統合テストがある。
+`unittest` ベースのテストがあり、`scripts/voice-input/` と
+`scripts/vim-switch-us-input/` にはシェル統合テストがある。
 
 ```bash
 cd scripts/battery-alert
@@ -135,6 +150,9 @@ python3 -m unittest discover -s tests
 
 cd ../voice-input
 tests/test_voice_input.sh
+
+cd ../vim-switch-us-input
+tests/test-vim-switch-us-input.sh
 ```
 
 それ以外のスクリプト（`t480s.sh` 等）にはテストスイートが存在せず、
