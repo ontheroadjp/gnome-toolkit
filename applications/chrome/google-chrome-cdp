@@ -1,5 +1,12 @@
-#!/bin/bash
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+# Keep the CDP instance separate from the regular Chrome desktop application.
+export CHROME_DESKTOP=google-chrome-cdp.desktop
+
 exec /usr/bin/google-chrome-stable \
+    --class=google-chrome-cdp \
     --remote-debugging-port=9222 \
     --user-data-dir="$HOME/.config/google-chrome-cdp" \
     "$@"

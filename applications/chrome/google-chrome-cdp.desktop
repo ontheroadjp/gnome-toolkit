@@ -5,11 +5,12 @@ GenericName=Web Browser
 Comment=Chrome with Chrome DevTools Protocol enabled on port 9222
 Exec=/home/diego/.local/bin/google-chrome-cdp %U
 StartupNotify=true
+StartupWMClass=google-chrome-cdp
 Terminal=false
 Icon=google-chrome
 Type=Application
 Categories=Network;WebBrowser;
-MimeType=text/html;text/xml;application/xhtml+xml;x-scheme-handler/http;x-scheme-handler/https;
+Keywords=CDP;DevTools;Debug;Remote Debugging;
 Actions=new-window;new-private-window;
 
 [Desktop Action new-window]
