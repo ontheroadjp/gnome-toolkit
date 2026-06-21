@@ -52,3 +52,8 @@ GNOMEカスタムショートカットをセットアップする冪等なイン
 - 初回ビルドとモデル取得にはネットワーク接続が必要。
 - systemdユーザーセッションが利用可能であることを前提とする。
 - 固定ポート8178が他プロセスに使用されている場合、サービスは起動できない。
+
+## 変更履歴（git log より自動生成）
+
+- d3925f3 feat(#17): keep whisper model loaded for voice input
+- adb6559 feat(#6): add whisper.cpp-based voice input script for GNOME

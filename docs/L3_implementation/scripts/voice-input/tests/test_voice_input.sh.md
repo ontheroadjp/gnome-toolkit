@@ -35,3 +35,7 @@ Bash関数で置換する（`test_voice_input.sh:25-51`）。
 ## 注意事項・既知の制限
 
 - whisper.cpp自体の認識精度やsystemd起動は対象外で、実機検証で補完する。
+
+## 変更履歴（git log より自動生成）
+
+- d3925f3 feat(#17): keep whisper model loaded for voice input

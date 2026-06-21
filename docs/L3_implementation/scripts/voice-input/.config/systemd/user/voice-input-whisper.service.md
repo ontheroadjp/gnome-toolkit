@@ -35,3 +35,7 @@ metadata:
 
 - 常駐中はbaseモデルと推論コンテキストのメモリを継続的に使用する。
 - ポート8178は固定であり、競合時はサービス起動に失敗する。
+
+## 変更履歴（git log より自動生成）
+
+- d3925f3 feat(#17): keep whisper model loaded for voice input

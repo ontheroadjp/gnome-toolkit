@@ -33,6 +33,13 @@
     │   ├── install.sh
     │   └── tests/
     │       └── test_mpv_player.py
+    ├── voice-input/                      # whisper.cpp オフライン音声入力
+    │   ├── voice-input.sh
+    │   ├── install.sh
+    │   ├── tests/
+    │   │   └── test_voice_input.sh
+    │   └── .config/systemd/user/
+    │       └── voice-input-whisper.service
     ├── fep-switcher/                     # GNOME 入力ソース切替コア（D-Bus サービス）
     │   ├── extension.js
     │   └── metadata.json
@@ -119,6 +126,14 @@ Python 製 launcher 一式。`mpv-player.py` は起動時に main menu を表示
 新規 playlist は `~/Music/playlist/mpv-player.m3u` に上書き保存される。
 `install.sh` は `mpv-player.py` を `~/.local/bin/music` へシンボリックリンク
 する。`tests/test_mpv_player.py` に `unittest` ベースのテストがある。
+
+### `scripts/voice-input/`
+GNOMEカスタムショートカットで16kHzモノラルWAVの録音をトグルし、localhostの
+`whisper-server` へ送信して文字起こし結果をWaylandクリップボードへコピーする。
+`install.sh` はwhisper.cppとbaseモデルを配置し、モデルを常駐させる
+`voice-input-whisper.service` をsystemdユーザーサービスとして有効化する。
+`tests/test_voice_input.sh` は外部コマンドをモックして成功・サーバー停止時のフローを
+検証する。
 
 ## 未確認事項
 

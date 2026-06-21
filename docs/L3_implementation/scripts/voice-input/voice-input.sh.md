@@ -54,3 +54,8 @@ WAVとして保存する（`voice-input.sh:31-37`）。
 - サーバー停止時は文字起こしを失敗として通知し、CLIへのフォールバックは行わない
   （`voice-input.sh:62-70`）。
 - 音声認識結果はクリップボードへコピーされるため、貼り付け操作は利用者が行う。
+
+## 変更履歴（git log より自動生成）
+
+- d3925f3 feat(#17): keep whisper model loaded for voice input
+- adb6559 feat(#6): add whisper.cpp-based voice input script for GNOME
