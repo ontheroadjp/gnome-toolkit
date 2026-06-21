@@ -1,7 +1,0 @@
-{
-  "name": "US Input for Terminals",
-  "description": "Switch the input source to US when a terminal window receives focus.",
-  "uuid": "focus-us-input@local",
-  "shell-version": ["46"],
-  "version": 1
-}

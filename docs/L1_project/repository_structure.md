@@ -33,7 +33,13 @@
     │   ├── install.sh
     │   └── tests/
     │       └── test_mpv_player.py
-    └── tmux-switch-us-input/             # tmux pane フォーカス時に IBus を US 切替
+    ├── fep-switcher/                     # GNOME 入力ソース切替コア（D-Bus サービス）
+    │   ├── extension.js
+    │   └── metadata.json
+    ├── app-switch-us-input/              # ウィンドウフォーカス時 US 切替クライアント
+    │   ├── extension.js
+    │   └── metadata.json
+    └── tmux-switch-us-input/             # tmux pane 切替時 US 切替クライアント
         └── switch-input-to-us
 ```
 
@@ -83,10 +89,22 @@
 `tests/test_battery_alert.py` に `unittest` ベースのテストがある。
 詳細は [scripts/battery-alert/README.md](../../scripts/battery-alert/README.md) 参照。
 
+### `scripts/fep-switcher/`
+GNOME 入力ソース切替のコア拡張（`fep-switcher@local`）。
+D-Bus サービス（`org.gnome.Shell.Extensions.FepSwitcher`）を公開し、
+`SwitchToUs()` / `SwitchToJa()` メソッドを提供する。イベントハンドリングは持たない。
+`install.sh` が `~/.local/share/gnome-shell/extensions/fep-switcher@local` へシンボリックリンクを作成する。
+
+### `scripts/app-switch-us-input/`
+ウィンドウフォーカスイベントのクライアント拡張（`app-switch-us-input@local`）。
+`notify::focus-window` を監視し、端末アプリにフォーカスが移ったとき D-Bus 経由で
+`fep-switcher@local` の `SwitchToUs()` を呼び出す。
+`install.sh` が `~/.local/share/gnome-shell/extensions/app-switch-us-input@local` へシンボリックリンクを作成する。
+
 ### `scripts/tmux-switch-us-input/`
-tmux の `after-select-pane` フックから呼び出されることを想定した単機能スクリプト。
-`gdbus call` で `focus-us-input@local` 拡張の `SwitchToUs()` D-Bus メソッドを呼び出し、
-GNOME の入力ソースをシステムレベルで US キーボードに切り替える。
+tmux pane 切替クライアントのシェルスクリプト。
+`after-select-pane` フックから呼び出され、`gdbus call` で `fep-switcher@local` の
+`SwitchToUs()` を呼び出す。
 `install.sh` が `~/.local/bin/switch-input-to-us` へシンボリックリンクを作成する。
 `~/.tmux.conf` への以下の行追記はユーザーが手動で行う:
 

@@ -29,10 +29,16 @@ gsettings set org.gnome.settings-daemon.plugins.media-keys.custom-keybinding:/or
 gsettings set org.gnome.settings-daemon.plugins.media-keys.custom-keybinding:/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom0/ binding '<Control><Shift>space'
 
 # ----------------------------------
-# focus-us-input (GNOME extension)
+# fep-switcher (GNOME extension: core)
 # ----------------------------------
-rm -rf ${HOME}/.local/share/gnome-shell/extensions/focus-us-input@local
-ln -sf ${CORE_TOOLKIT_FOR_GNOME_PATH}/scripts/focus-us-input ${HOME}/.local/share/gnome-shell/extensions/focus-us-input@local
+rm -rf ${HOME}/.local/share/gnome-shell/extensions/fep-switcher@local
+ln -sf ${CORE_TOOLKIT_FOR_GNOME_PATH}/scripts/fep-switcher ${HOME}/.local/share/gnome-shell/extensions/fep-switcher@local
+
+# ----------------------------------
+# app-switch-us-input (GNOME extension: window focus client)
+# ----------------------------------
+rm -rf ${HOME}/.local/share/gnome-shell/extensions/app-switch-us-input@local
+ln -sf ${CORE_TOOLKIT_FOR_GNOME_PATH}/scripts/app-switch-us-input ${HOME}/.local/share/gnome-shell/extensions/app-switch-us-input@local
 
 # ----------------------------------
 # tmux-switch-us-input
@@ -44,11 +50,11 @@ ln -sf ${CORE_TOOLKIT_FOR_GNOME_PATH}/scripts/tmux-switch-us-input/switch-input-
 # ----------------------------------
 cat <<'EOF'
 
-=== Manual step 1: reload focus-us-input extension ===
-Run the following to apply the D-Bus interface:
+=== Manual step 1: enable GNOME extensions ===
+Run the following to activate the new extensions (required after first install or logout/login):
 
-  gnome-extensions disable focus-us-input@local
-  gnome-extensions enable focus-us-input@local
+  gnome-extensions enable fep-switcher@local
+  gnome-extensions enable app-switch-us-input@local
 
 === Manual step 2: ~/.tmux.conf ===
 Add the following line to enable auto-switch to US input on pane focus:

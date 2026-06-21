@@ -1,0 +1,7 @@
+{
+  "name": "App Switch US Input",
+  "description": "Switch input source to US when a terminal window receives focus, via fep-switcher D-Bus service.",
+  "uuid": "app-switch-us-input@local",
+  "shell-version": ["46"],
+  "version": 1
+}

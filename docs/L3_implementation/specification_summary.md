@@ -134,16 +134,34 @@ main menu を表示する。対象ディレクトリは `~/Music`、playlist の
 | インストール | `~/.local/bin/music` を `mpv-player.py` へのシンボリックリンクとして作成 | `install.sh` |
 | テスト | `tests/test_mpv_player.py`（`unittest`、9件） | ファイル内容確認済み |
 
-## 7. `scripts/tmux-switch-us-input/` — tmux pane フォーカス時 US 入力切替
+## 7. FEP 入力ソース切替（3コンポーネント構成）
 
-`switch-input-to-us` は `gdbus call` で `focus-us-input@local` GNOME 拡張の D-Bus メソッドを呼び出す bash スクリプト。
+GNOME 入力ソースの切替を「コア D-Bus サービス」と「イベントクライアント」に分離した構成。
+
+### `scripts/fep-switcher/` — コア（D-Bus サービス）
 
 | 項目 | 内容 | 根拠 |
 |---|---|---|
-| 実行内容 | `gdbus call` で `org.gnome.Shell.Extensions.FocusUsInput.SwitchToUs()` を呼び出し GNOME 入力ソースを US に切替 | `switch-input-to-us:3-7` |
-| 前提 | `focus-us-input@local` GNOME 拡張が有効であること | スクリプト冒頭コメント |
-| エラー処理 | `2>/dev/null` で stderr を抑制（拡張無効時も静かに失敗） | `switch-input-to-us:7` |
-| インストール | `install.sh` が `focus-us-input@local` への symlink 作成 + `~/.local/bin/switch-input-to-us` への symlink 作成 | `install.sh` focus-us-input / tmux-switch-us-input セクション |
+| 役割 | D-Bus サービス `org.gnome.Shell.Extensions.FepSwitcher` を公開するのみ | `fep-switcher/extension.js` |
+| メソッド | `SwitchToUs()`: xkb:us を activate / `SwitchToJa()`: ibus:mozc-jp を activate | `fep-switcher/extension.js:41-50` |
+| インストール | `install.sh` が `~/.local/share/gnome-shell/extensions/fep-switcher@local` へ symlink 作成 | `install.sh` fep-switcher セクション |
+
+### `scripts/app-switch-us-input/` — ウィンドウフォーカスクライアント
+
+| 項目 | 内容 | 根拠 |
+|---|---|---|
+| 役割 | `notify::focus-window` を監視し端末アプリへのフォーカス時に `SwitchToUs()` を呼ぶ | `app-switch-us-input/extension.js` |
+| 呼び出し方法 | `Gio.DBus.session.call()` で `fep-switcher@local` の `SwitchToUs()` を呼び出す | `app-switch-us-input/extension.js:72-79` |
+| インストール | `install.sh` が `~/.local/share/gnome-shell/extensions/app-switch-us-input@local` へ symlink 作成 | `install.sh` app-switch-us-input セクション |
+
+### `scripts/tmux-switch-us-input/` — tmux pane クライアント
+
+| 項目 | 内容 | 根拠 |
+|---|---|---|
+| 役割 | tmux `after-select-pane` フックから `SwitchToUs()` を呼ぶ bash スクリプト | `switch-input-to-us` |
+| 呼び出し方法 | `gdbus call` で `fep-switcher@local` の `SwitchToUs()` を呼び出す | `switch-input-to-us:3-7` |
+| エラー処理 | `>/dev/null 2>&1` で stdout/stderr を抑制（拡張無効時も静かに失敗） | `switch-input-to-us:7` |
+| インストール | `install.sh` が `~/.local/bin/switch-input-to-us` へ symlink 作成 | `install.sh` tmux-switch-us-input セクション |
 | tmux 連携 | `~/.tmux.conf` に `set-hook -g after-select-pane 'run-shell "switch-input-to-us"'` をユーザーが手動追記 | install.sh の Manual steps 表示 |
 
 ## 8. `scripts/voice-input/` — オフライン音声入力
