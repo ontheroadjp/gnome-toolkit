@@ -85,7 +85,8 @@
 
 ### `scripts/tmux-switch-us-input/`
 tmux の `after-select-pane` フックから呼び出されることを想定した単機能スクリプト。
-`ibus engine xkb:us::eng` を実行し、IBus の入力ソースを US キーボードに切り替える。
+`gdbus call` で `focus-us-input@local` 拡張の `SwitchToUs()` D-Bus メソッドを呼び出し、
+GNOME の入力ソースをシステムレベルで US キーボードに切り替える。
 `install.sh` が `~/.local/bin/switch-input-to-us` へシンボリックリンクを作成する。
 `~/.tmux.conf` への以下の行追記はユーザーが手動で行う:
 

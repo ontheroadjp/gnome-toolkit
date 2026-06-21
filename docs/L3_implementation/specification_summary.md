@@ -136,14 +136,14 @@ main menu を表示する。対象ディレクトリは `~/Music`、playlist の
 
 ## 7. `scripts/tmux-switch-us-input/` — tmux pane フォーカス時 US 入力切替
 
-`switch-input-to-us` は1コマンドのみの bash スクリプト。
+`switch-input-to-us` は `gdbus call` で `focus-us-input@local` GNOME 拡張の D-Bus メソッドを呼び出す bash スクリプト。
 
 | 項目 | 内容 | 根拠 |
 |---|---|---|
-| 実行内容 | `ibus engine xkb:us::eng` を実行して IBus 入力ソースを US に切替 | `switch-input-to-us:4` |
-| 前提 | IBus が起動済みで `xkb:us::eng` エンジンが利用可能なこと | スクリプト冒頭コメント |
-| エラー処理 | `2>/dev/null` で stderr を抑制（IBus 未起動時も静かに失敗） | `switch-input-to-us:4` |
-| インストール | `install.sh` が `~/.local/bin/switch-input-to-us` へシンボリックリンクを作成 | `install.sh` tmux-switch-us-input セクション |
+| 実行内容 | `gdbus call` で `org.gnome.Shell.Extensions.FocusUsInput.SwitchToUs()` を呼び出し GNOME 入力ソースを US に切替 | `switch-input-to-us:3-7` |
+| 前提 | `focus-us-input@local` GNOME 拡張が有効であること | スクリプト冒頭コメント |
+| エラー処理 | `2>/dev/null` で stderr を抑制（拡張無効時も静かに失敗） | `switch-input-to-us:7` |
+| インストール | `install.sh` が `focus-us-input@local` への symlink 作成 + `~/.local/bin/switch-input-to-us` への symlink 作成 | `install.sh` focus-us-input / tmux-switch-us-input セクション |
 | tmux 連携 | `~/.tmux.conf` に `set-hook -g after-select-pane 'run-shell "switch-input-to-us"'` をユーザーが手動追記 | install.sh の Manual steps 表示 |
 
 ## 8. `scripts/voice-input/` — オフライン音声入力
