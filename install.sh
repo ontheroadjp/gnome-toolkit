@@ -48,6 +48,11 @@ gnome-extensions enable app-switch-us-input@local
 ln -sf ${CORE_TOOLKIT_FOR_GNOME_PATH}/scripts/tmux-switch-us-input/switch-input-to-us ${HOME}/.local/bin/switch-input-to-us
 
 # ----------------------------------
+# espanso
+# ----------------------------------
+ln -sf ${CORE_TOOLKIT_FOR_GNOME_PATH}/root/home/user/.config/espanso $HOME/.config
+
+# ----------------------------------
 # Manual steps
 # ----------------------------------
 cat <<'EOF'
@@ -58,6 +63,12 @@ Add the following line to enable auto-switch to US input on pane focus:
   set-hook -g after-select-pane 'run-shell "switch-input-to-us"'
 
 NOTE: On Wayland, newly installed GNOME extensions take effect after logout/login.
+
+=== Manual step: espanso ===
+Run the following to register and start espanso as a user service:
+
+  espanso service register
+  espanso service start
 
 EOF
 

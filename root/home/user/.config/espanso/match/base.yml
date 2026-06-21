@@ -1,0 +1,3 @@
+matches:
+  - trigger: "@@1975"
+    replace: "your-email@example.com"
