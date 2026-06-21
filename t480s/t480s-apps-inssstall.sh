@@ -31,7 +31,7 @@ echo '----------------------------'
 echo 'Install system utilities ...'
 echo '----------------------------'
 sudo apt install -y \
-    hyperfile \
+    hyperfine \
     rclone \
     gocryptfs \
     gpaste-2 gir1.2-gpaste-2
@@ -134,7 +134,7 @@ echo '----------------------------'
 echo 'Install codex ...'
 echo '----------------------------'
 if ! command -v codex >/dev/null 2>&1; then
-    npm install -g @openai/codex
+    "${MISE_BIN}" exec node@24 -- npm install -g @openai/codex
 else
     echo "codex is already installd."
 fi
@@ -162,4 +162,17 @@ if ! command -v yt-dlp >/dev/null 2>&1; then
 else
     echo "yt-dlp is already installed and try upgrade to new version if available..."
     sudo yt-dlp -U
+fi
+
+echo '----------------------------'
+echo 'Install espanso ...'
+echo '----------------------------'
+if ! command -v espanso >/dev/null 2>&1; then
+    echo "Installing espanso ..."
+    cd /tmp || exit
+    wget https://github.com/espanso/espanso/releases/latest/download/espanso-debian-wayland-amd64.deb
+    sudo apt install -y ./espanso-debian-wayland-amd64.deb
+    rm espanso-debian-wayland-amd64.deb
+else
+    echo "espanso is already installed."
 fi
