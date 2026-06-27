@@ -3,6 +3,11 @@
 REPO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 # ----------------------------------
+# core tools (no config in this repo)
+# ----------------------------------
+"${REPO_DIR}/scripts/core-tools/install.sh"
+
+# ----------------------------------
 # keyd
 # ----------------------------------
 "${REPO_DIR}/applications/keyd/install.sh"
@@ -26,6 +31,11 @@ REPO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # espanso
 # ----------------------------------
 "${REPO_DIR}/applications/espanso/install.sh"
+
+# ----------------------------------
+# chrome
+# ----------------------------------
+"${REPO_DIR}/applications/chrome/install.sh"
 
 # ----------------------------------
 # settings > keyboard > custom shortcuts

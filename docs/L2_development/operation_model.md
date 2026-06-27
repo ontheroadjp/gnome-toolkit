@@ -15,16 +15,15 @@ CI が存在しないため（`.github/` 不在を確認済み）、以下はす
 ## 1. パッケージ・ツールのセットアップ
 
 ```bash
-./t480s_apps.sh
+./scripts/core-tools/install.sh
 ```
 
-- `sudo` を要求するため対話的に実行すること（`t480s_apps.sh:9` 等）。
-- `curl | sh` 形式のインストーラ（mise: `t480s_apps.sh:60`、
-  claude code: `t480s_apps.sh:94`）を含むため、ネットワーク接続が必要。
-- 各ツールは `command -v` で存在確認後にインストールするため、
-  再実行しても重複インストールにはならない設計（`t480s_apps.sh:47,67,
-  80,93,101,109,121`）。ただし apt 系のパッケージ（`t480s_apps.sh:9-20,
-  29-33,39-42`）には存在チェックがなく、`apt install` の冪等性に依存する。
+- `sudo` を要求するため対話的に実行すること。
+- `curl | sh` 形式のインストーラ（mise, Claude Code）を含むため、ネットワーク接続が必要。
+- `command -v` で存在確認後にインストールするため、再実行しても重複インストールにはならない設計
+  （mise, gh, ghq, claude, codex）。apt 系パッケージには存在チェックがなく `apt install` の冪等性に依存する。
+- アプリ固有のパッケージ（keyd, ffmpeg, mpv, yt-dlp, espanso, google-chrome）は
+  各 `applications/*/install.sh` が担う（Section 3 参照）。
 
 ## 2. GNOME デスクトップ設定の適用
 

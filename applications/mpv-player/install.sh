@@ -1,9 +1,11 @@
 #!/bin/bash
-set -Ceu
+set -eu
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 BIN_DIR="${HOME}/.local/bin"
 CONFIG_DIR="${HOME}/.config"
+
+sudo apt install -y ffmpeg mpv
 
 mkdir -p "${BIN_DIR}" "${CONFIG_DIR}"
 
