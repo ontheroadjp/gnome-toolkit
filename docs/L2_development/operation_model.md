@@ -5,10 +5,10 @@ CI が存在しないため（`.github/` 不在を確認済み）、以下はす
 
 ## 前提
 
-- 対象OS: Ubuntu系（`apt` が使えること）。根拠: `t480s_apps.sh:9,29,39` が
+- 対象OS: Ubuntu系（`apt` が使えること）。根拠: `scripts/core-tools/install.sh:9,26,36,47` が
   すべて `sudo apt install` を呼んでいる。
-- 対象デスクトップ: GNOME Shell。根拠: `t480s.sh` の `org.gnome.*` schema、
-  `.local/bin/gnome-overview-toggle` の `org.gnome.Shell` DBus呼び出し。
+- 対象デスクトップ: GNOME Shell。根拠: `t480s/t480s-settings.sh` の `org.gnome.*` schema、
+  `gnome-extensions/gnome-overview-toggle/gnome-overview-toggle` の `org.gnome.Shell` DBus呼び出し。
 - 実行権限: 両スクリプトとも実行可能ビット付き
   （`ls -la` で `rwxrwxr-x` を確認済み）。
 
@@ -28,16 +28,16 @@ CI が存在しないため（`.github/` 不在を確認済み）、以下はす
 ## 2. GNOME デスクトップ設定の適用
 
 ```bash
-./t480s.sh
+./t480s/t480s-settings.sh
 ```
 
-- `sudo` を要求する箇所がある（バッテリー充電閾値、`t480s.sh:53-54`）。
+- `sudo` を要求する箇所がある（バッテリー充電閾値、`t480s-settings.sh:57-58`）。
   これは `BAT0` という `/sys/class/power_supply/` 配下のデバイス名に
   依存しており、T480s 以外の機種やバッテリー名が異なる環境では
   失敗する可能性がある（未確認: `BAT0` という名前が他機種でも
   共通かどうかは本リポジトリの範囲では検証していない）。
 - バッテリー充電閾値を再起動後も永続化させたい場合は、
-  `t480s.sh:56-64` のコメントに `tlp` パッケージを使う手順がメモされて
+  `t480s-settings.sh:60-67` のコメントに `tlp` パッケージを使う手順がメモされて
   いるが、これは実行コードではなく手動対応が必要。
 
 ## 3. dotfiles・アプリ設定のインストール
@@ -52,11 +52,11 @@ CI が存在しないため（`.github/` 不在を確認済み）、以下はす
 # または個別インストール
 ./applications/alacritty/install.sh      # ~/.config/alacritty → applications/alacritty/
 ./applications/espanso/install.sh        # ~/.config/espanso → applications/espanso/
-./applications/mpv-player/install.sh     # ~/.config/mpv → applications/mpv-player/
+./applications/mpv-player/install.sh     # ~/.local/bin/music, ~/.config/mpv → applications/mpv-player/
 ./applications/yt-dlp/install.sh         # ~/.config/yt-dlp → applications/yt-dlp/
 sudo ./applications/keyd/install.sh      # /etc/keyd → applications/keyd/ (sudo 必要)
 
-# gnome-overview-toggle（install.sh 内ではコメントアウト）
+# gnome-overview-toggle（install.sh 内ではコメントアウト、個別に実行）
 ./gnome-extensions/gnome-overview-toggle/install.sh
 ```
 
@@ -65,7 +65,7 @@ sudo ./applications/keyd/install.sh      # /etc/keyd → applications/keyd/ (sud
 
 ## 4. Alacritty テーマの切り替え
 
-`.config/alacritty/alacritty.toml:5-6` の `import` 行を編集し、
+`applications/alacritty/alacritty.toml:5-6` の `import` 行を編集し、
 コメントアウトを入れ替えることで切り替える（GUIやコマンドでの
 切り替え機構はない。手動でファイルを編集する運用）。
 
@@ -98,11 +98,11 @@ systemctl --user enable --now battery-alert.timer
 ## 6. mpv music launcher のインストールと実行
 
 ```bash
-scripts/mpv-player/install.sh
+./applications/mpv-player/install.sh
 music
 ```
 
-- `install.sh` は `scripts/mpv-player/mpv-player.py` を
+- `install.sh` は `applications/mpv-player/mpv-player.py` を
   `~/.local/bin/music` へシンボリックリンクする。`sudo` は不要。
 - `music` は起動時に main menu を表示し、`~/Music` 配下の音声/動画ファイル
   から playlist を作成する。メニュー 2 では fzf で絞り込まれた候補全件を
@@ -138,28 +138,25 @@ Plug 'ontheroadjp/core-toolkit-for-gnome', { 'rtp': 'scripts/vim-switch-us-input
   tmux 用クライアントには依存しない。
 - `+job` 対応 Vim、`dbus-send`、有効な `fep-switcher@local` が必要。
 
-## ビルド・テストについて
-
-リポジトリ全体としてのビルドプロセス・CIは存在しない（`.github/` 不在を
-確認済み）。`scripts/battery-alert/` と `scripts/mpv-player/` には
-`unittest` ベースのテストがあり、`scripts/voice-input/` と
-`scripts/vim-switch-us-input/` にはシェル統合テストがある。
+## テスト実行
 
 ```bash
-cd scripts/battery-alert
-python3 -m unittest discover -s tests
+# install.sh の整合性・参照ファイル・呼び出し構成を検証
+bash tests/test_install.sh
 
-cd ../../scripts/mpv-player
-python3 -m unittest discover -s tests
+# 全 install.sh を shellcheck（未インストールの場合は bash -n）で検証
+bash tests/lint_shell.sh
 
-cd ../voice-input
-tests/test_voice_input.sh
+# 各モジュールのユニット／インテグレーションテスト
+cd scripts/battery-alert && python3 -m unittest discover -s tests
 
-cd ../vim-switch-us-input
-tests/test-vim-switch-us-input.sh
+cd ../../applications/mpv-player && python3 -m unittest discover -s tests
+
+cd ../../scripts/voice-input && bash tests/test_voice_input.sh
+
+cd ../vim-switch-us-input && bash tests/test-vim-switch-us-input.sh
 ```
 
-それ以外のスクリプト（`t480s.sh` 等）にはテストスイートが存在せず、
-動作確認はスクリプト実行後に GNOME の実際の挙動を目視で確認する運用と
-推測される（未確認: 目視確認の具体的なチェックリストはリポジトリ内に
-存在しない）。
+`t480s/t480s-settings.sh` 等のテストスイートは存在せず、
+動作確認は実行後に GNOME の実際の挙動を目視で確認する運用である
+（未確認: 目視確認の具体的なチェックリストはリポジトリ内に存在しない）。

@@ -1,57 +1,82 @@
 # 整合性確認の観点と手順
 
-CI が存在しないため、すべて手動での整合性確認が前提となる。
+CI が存在しないため、以下の手順は手動実行が前提となる。
+`tests/` 配下に自動化テストがあるが、CI に接続されていない（`.github/` 不在）。
 
 ## 1. スクリプトの構文チェック
 
+`tests/lint_shell.sh` を実行すると、リポジトリ内のすべての `install.sh` を
+shellcheck（または bash -n）で一括チェックできる。
+
 ```bash
-bash -n t480s.sh
-bash -n t480s_apps.sh
-sh -n .local/bin/gnome-overview-toggle
+bash tests/lint_shell.sh
+```
+
+個別に確認したい場合:
+
+```bash
+bash -n t480s/t480s-settings.sh
+bash -n scripts/core-tools/install.sh
+sh -n gnome-extensions/gnome-overview-toggle/gnome-overview-toggle
 ```
 
 `shellcheck` の設定ファイル（`.shellcheckrc`）はリポジトリ内に
 存在しないため、`shellcheck` を使う場合はデフォルトルールで実行する
 （未確認: `shellcheck` 自体がこのマシンに導入されているかは
-`t480s_apps.sh` のインストール対象リストに含まれていないため、
+`scripts/core-tools/install.sh` のインストール対象リストに含まれていないため、
 別途インストールが必要）。
 
-## 2. 実行可能ビットの確認
+## 2. install.sh の整合性テスト
+
+```bash
+bash tests/test_install.sh
+```
+
+以下の5点を検証する:
+- 各 `install.sh` の構文チェック（shellcheck/bash -n）
+- `install.sh` が参照するファイル（mpv-player.py, espanso-toggle, keyd/default.conf 等）の実在確認
+- ルートの `install.sh` が全 per-app スクリプトを呼び出していること
+- ツールカバレッジ（build-essential, tmux, fzf, mise, ghq, claude 等が新スクリプト群でカバーされていること）
+- `t480s/t480s-apps-install.sh` が削除済みであること（リファクタリング完了確認）
+
+## 3. 実行可能ビットの確認
 
 このリポジトリのスクリプトは実行可能ビットが意味を持つ
-（`./t480s.sh` のように直接実行する運用、`t480s_apps.sh:1` 等の
-shebang 行を参照）。新しいスクリプトを追加・変更した際は
+（`./t480s/t480s-settings.sh` のように直接実行する運用）。新しいスクリプトを追加・変更した際は
 以下で実行権限を確認する。
 
 ```bash
-ls -la t480s.sh t480s_apps.sh .local/bin/gnome-overview-toggle
+ls -la t480s/t480s-settings.sh scripts/core-tools/install.sh gnome-extensions/gnome-overview-toggle/gnome-overview-toggle
 ```
 
-## 3. dotfiles シンボリックリンクの整合性確認
+## 4. dotfiles シンボリックリンクの整合性確認
 
-`~/.config/alacritty` と `~/.local/bin/gnome-overview-toggle` が
-このリポジトリ内のパスを指しているかを確認する。
+`~/.config/alacritty` 等が このリポジトリ内のパスを指しているかを確認する。
 
 ```bash
 readlink -f ~/.config/alacritty
+readlink -f ~/.config/mpv
+readlink -f ~/.config/yt-dlp
+readlink -f ~/.config/espanso
 readlink -f ~/.local/bin/gnome-overview-toggle
+readlink -f ~/.local/bin/switch-input-to-us
+readlink -f ~/.local/bin/music
 ```
 
-期待される出力はそれぞれ `<このリポジトリの絶対パス>/.config/alacritty`、
-`<このリポジトリの絶対パス>/.local/bin/gnome-overview-toggle` と
-一致すること（本ドキュメント作成時点で実機にて一致を確認済み）。
+期待される出力はそれぞれ `<このリポジトリの絶対パス>/applications/alacritty` 等。
 
-## 4. GNOME 設定の反映確認
+## 5. GNOME 設定の反映確認
 
-`t480s.sh` 実行後、対応する `gsettings get` で値が反映されているかを
+`t480s/t480s-settings.sh` 実行後、対応する `gsettings get` で値が反映されているかを
 確認できる。例:
 
 ```bash
 gsettings get org.gnome.desktop.peripherals.keyboard repeat-interval
 gsettings get org.gnome.desktop.wm.keybindings switch-input-source
+gsettings get org.gnome.desktop.wm.keybindings switch-windows
 ```
 
-## 5. docs と repo.profile.json の相互整合性
+## 6. docs と repo.profile.json の相互整合性
 
 `/init-docs` または `/docs-sync` を再実行する際は、以下を確認する。
 
@@ -62,10 +87,3 @@ gsettings get org.gnome.desktop.wm.keybindings switch-input-source
   最新のスクリプト内容とズレていないか
   （スクリプトの行数が変わった場合は該当ドキュメントの行番号根拠を
   更新する）。
-
-## 確認済み事項（参考）
-
-- OSは Ubuntu 24.04.4 LTS (Noble Numbat)。根拠: OS情報ファイル(`os-release`、`/etc` 配下)の
-  `PRETTY_NAME="Ubuntu 24.04.4 LTS"`（本コマンド実行時にライブシステムで
-  確認。リポジトリ内にOS名を明記したファイルはないため、リポジトリ単体では
-  確認できない事項だった）。

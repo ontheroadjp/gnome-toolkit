@@ -2,7 +2,7 @@
   "repo_id": "gnome-toolkit",
   "repo_type": "shell-script-dotfiles",
   "package_manager": "none",
-  "package_manager_evidence": "No package.json/go.mod/Gemfile/requirements.txt/Cargo.toml found at repo root (confirmed by directory listing). System package installs inside scripts use apt (t480s_apps.sh:9,29,39) but that manages the OS, not this repo.",
+  "package_manager_evidence": "No package.json/go.mod/Gemfile/requirements.txt/Cargo.toml found at repo root (confirmed by directory listing). System package installs inside scripts use apt (scripts/core-tools/install.sh:9-20) but that manages the OS, not this repo.",
   "ci_defined": false,
   "ci_evidence": ".github/ does not exist in this repo (confirmed: find .github -> not found).",
   "doc_roots": [
@@ -13,9 +13,14 @@
   ],
   "commands": {
     "apply_gnome_settings": {
-      "run": "./t480s.sh",
-      "evidence": "t480s.sh:1 (#!/bin/bash), file mode 755",
-      "note": "Several lines use sudo (t480s.sh:53-54); not idempotent-safe to re-run blindly on a different machine model."
+      "run": "./t480s/t480s-settings.sh",
+      "evidence": "t480s/t480s-settings.sh:1 (#!/bin/bash), file mode 755",
+      "note": "Several lines use sudo (t480s/t480s-settings.sh:57-58 for battery thresholds via /sys/class/power_supply/BAT0/); not idempotent-safe to re-run blindly on a different machine model."
+    },
+    "install_all": {
+      "run": "./install.sh",
+      "evidence": "install.sh:1 (#!/bin/bash), file mode 755",
+      "note": "Orchestrates all per-app install.sh: calls scripts/core-tools/install.sh, then applications/*/install.sh, then wires GNOME extensions and symlinks for fep-switcher, app-switch-us-input, tmux-switch-us-input."
     },
     "install_packages_and_tools": {
       "run": "./scripts/core-tools/install.sh",
@@ -23,9 +28,9 @@
       "note": "Installs apt packages and tools (mise, gh, ghq, Claude Code, Codex CLI) via curl/wget pipelines; requires sudo and network access. App-specific packages (keyd, mpv, ffmpeg, yt-dlp, espanso, google-chrome) are installed by each applications/*/install.sh."
     },
     "toggle_gnome_overview": {
-      "run": ".local/bin/gnome-overview-toggle",
-      "evidence": ".local/bin/gnome-overview-toggle:1 (#!/bin/sh), file mode 755",
-      "note": "Designed to be invoked via a keyboard shortcut, not run directly by a human. Currently bound on this machine to Shift+Ctrl+Space via dconf custom-keybindings/custom0 (observed via `dconf dump`, not stored in this repo)."
+      "run": "./gnome-extensions/gnome-overview-toggle/gnome-overview-toggle",
+      "evidence": "gnome-extensions/gnome-overview-toggle/gnome-overview-toggle:1 (#!/bin/sh), file mode 755",
+      "note": "Designed to be invoked via a keyboard shortcut, not run directly by a human. install.sh (in gnome-extensions/gnome-overview-toggle/) symlinks this to ~/.local/bin/gnome-overview-toggle and registers a GNOME custom keybinding."
     },
     "install_battery_alert": {
       "run": "./scripts/battery-alert/install.sh",

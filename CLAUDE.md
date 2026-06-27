@@ -7,7 +7,7 @@
 ## このリポジトリについて
 
 Lenovo ThinkPad T480s (Ubuntu 24.04 LTS / GNOME) 向けの個人用シェルスクリプト・
-dotfiles 集。アプリケーションコード・CI・テストは存在しない。
+dotfiles 集。CI は存在しない。テストは `tests/` 配下に手動実行前提で存在する。
 詳細: [docs/L0_concept/concept.md](docs/L0_concept/concept.md)。
 
 ## Custom / Command の使い分け（AI向けルール）
@@ -19,14 +19,29 @@ dotfiles 集。アプリケーションコード・CI・テストは存在しな
 
 ## このリポジトリ固有の注意点
 
-- `t480s.sh` / `t480s_apps.sh` は `sudo` を要する行を含む
-  （バッテリー充電閾値、apt install 等）。AI が自律的にこれらを実行することは
-  想定しない。実行内容の説明・修正案の提示まではAIの役割、実行はユーザー判断。
+- `t480s/t480s-settings.sh` は `sudo` を要する行を含む
+  （バッテリー充電閾値: `t480s-settings.sh:57-58`、`echo 30 | sudo tee /sys/class/power_supply/BAT0/charge_start_threshold` 等）。
+  AI が自律的にこれらを実行することは想定しない。実行内容の説明・修正案の提示まではAIの役割、実行はユーザー判断。
 - `curl | sh` / `wget | sudo tee` 形式のリモートインストーラ
-  （`t480s_apps.sh:60,69-71,94,123`）を変更する際は、出典URLの正当性を
+  （`scripts/core-tools/install.sh:56,67-71,96`）を変更する際は、出典URLの正当性を
   必ず確認すること。
-- `.config/` と `.local/bin/` はホームディレクトリへのシンボリックリンク先として
-  実機で使われている（`docs/L1_project/repository_structure.md` の未確認事項1参照）。
-  これらのパス配下のファイルを編集すると、即座に実機の挙動に影響する可能性がある。
+- `applications/` と `gnome-extensions/` 配下の設定ファイルは、各 `install.sh` が
+  ホームディレクトリ（`~/.config/`、`~/.local/bin/` 等）へのシンボリックリンクとして
+  実機で使われている。これらのパス配下のファイルを編集すると、
+  即座に実機の挙動に影響する可能性がある。
 - コミット時は `git add -A` / `git add .` を使わず、変更ファイルを個別に
   ステージングする。
+
+## Local Tooling Environment
+
+Observed by /init-docs on 2026-06-27:
+- gh: 2.95.0 (installed at /usr/bin/gh)
+- gh auth: logged in to github.com as ontheroadjp (keyring), SSH protocol
+- node: v24.16.0 (managed by mise, at ~/.local/share/mise/installs/node/24/bin/node)
+- npm: 11.13.0 (managed by mise)
+- Node runtime manager hints: mise confirmed active (mise use -g node@24 in use)
+
+Notes:
+- If `gh` operations fail with API schema or compatibility errors, check `gh --version` first. Prefer upgrading `gh` when possible; if upgrading is impossible, use an equivalent `gh api` REST call or GitHub Web UI for the affected operation.
+- Before npm operations, run `node --version` and `npm --version` to confirm Node.js and npm are available in the current shell. mise manages Node.js — if `node` is not found, ensure mise shims are in PATH or use `mise exec node@24 -- <command>`.
+- Do not install or upgrade `gh`, Node.js, or npm automatically without explicit user confirmation.
