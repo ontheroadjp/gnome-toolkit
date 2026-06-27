@@ -6,9 +6,6 @@
 ```
 .
 ├── install.sh                            # 全アプリ一括インストール（per-app install.sh を呼び出す）
-├── t480s/
-│   ├── t480s-settings.sh                # GNOME desktop 設定スクリプト
-│   └── README.md
 ├── tests/                                # install.sh 動作検証テスト群
 │   ├── test_install.sh                  # install.sh の構文・参照ファイル・呼び出し構成を検証
 │   └── lint_shell.sh                    # 全 install.sh を shellcheck/bash -n で構文チェック
@@ -62,6 +59,12 @@
     │   └── .config/systemd/user/
     │       ├── battery-alert.service
     │       └── battery-alert.timer
+    ├── core-gnome-settings/              # 機種不問の GNOME 設定（gsettings）
+    │   ├── apply-settings.sh            # gsettings 一括適用（sudo 不要）
+    │   └── README.md
+    ├── core-t480s-settings/              # ThinkPad 固有設定（thinkpad_acpi 必須）
+    │   ├── apply-settings.sh            # バッテリー充電閾値設定（sudo 必須）
+    │   └── README.md
     ├── core-tools/                       # 汎用CLIツール一括インストール（設定ファイルなし）
     │   └── install.sh
     ├── voice-input/                      # whisper.cpp オフライン音声入力
@@ -96,12 +99,17 @@
 app-switch-us-input）のシンボリックリンク作成・有効化と tmux-switch-us-input のリンクを張る。
 （`install.sh` 全体を確認済み）
 
-### `t480s/t480s-settings.sh`
-`gsettings set` コマンド列と `/sys/class/power_supply/BAT0/` への `sudo tee` で構成され
-（`t480s-settings.sh:6-58`）、GNOME のアニメーション・キーボード・キーバインド・
-ワークスペース切替・フォントレンダリング・バッテリー充電閾値を設定する。
-末尾のコメント（`t480s-settings.sh:60-67`）に `tlp` を使った充電閾値の永続化手順が
-メモとして残っているが、実行コードではない（コメントアウト済み）。
+### `scripts/core-gnome-settings/apply-settings.sh`
+全行 `gsettings set/reset` で構成される（`apply-settings.sh:6-51`）。
+GNOME のアニメーション・キーボード・キーバインド・ワークスペース切替・フォントレンダリングを設定する。
+`sudo` 不要、機種を問わず利用可能。
+
+### `scripts/core-t480s-settings/apply-settings.sh`
+ThinkPad 固有の sysfs 属性（`/sys/class/power_supply/BAT0/charge_start_threshold`・
+`charge_stop_threshold`）へ `sudo tee` で充電閾値を書き込む（`apply-settings.sh:8-9`）。
+`thinkpad_acpi` カーネルモジュールが提供するため ThinkPad 専用。再起動後は設定がリセットされる。
+末尾のコメント（`apply-settings.sh:12-19`）に `tlp` を使った永続化手順がメモされているが、
+実行コードではない（コメントアウト済み）。
 
 ### `applications/alacritty/`
 `install.sh` が `~/.config/alacritty` → このディレクトリへのシンボリックリンクを作成し、

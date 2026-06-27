@@ -15,7 +15,8 @@ bash tests/lint_shell.sh
 個別に確認したい場合:
 
 ```bash
-bash -n t480s/t480s-settings.sh
+bash -n scripts/core-gnome-settings/apply-settings.sh
+bash -n scripts/core-t480s-settings/apply-settings.sh
 bash -n scripts/core-tools/install.sh
 sh -n gnome-extensions/gnome-overview-toggle/gnome-overview-toggle
 ```
@@ -42,11 +43,11 @@ bash tests/test_install.sh
 ## 3. 実行可能ビットの確認
 
 このリポジトリのスクリプトは実行可能ビットが意味を持つ
-（`./t480s/t480s-settings.sh` のように直接実行する運用）。新しいスクリプトを追加・変更した際は
+（`./scripts/core-gnome-settings/apply-settings.sh` のように直接実行する運用）。新しいスクリプトを追加・変更した際は
 以下で実行権限を確認する。
 
 ```bash
-ls -la t480s/t480s-settings.sh scripts/core-tools/install.sh gnome-extensions/gnome-overview-toggle/gnome-overview-toggle
+ls -la scripts/core-gnome-settings/apply-settings.sh scripts/core-t480s-settings/apply-settings.sh scripts/core-tools/install.sh gnome-extensions/gnome-overview-toggle/gnome-overview-toggle
 ```
 
 ## 4. dotfiles シンボリックリンクの整合性確認
@@ -67,7 +68,7 @@ readlink -f ~/.local/bin/music
 
 ## 5. GNOME 設定の反映確認
 
-`t480s/t480s-settings.sh` 実行後、対応する `gsettings get` で値が反映されているかを
+`scripts/core-gnome-settings/apply-settings.sh` 実行後、対応する `gsettings get` で値が反映されているかを
 確認できる。例:
 
 ```bash

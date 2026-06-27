@@ -10,28 +10,32 @@ Lenovo ThinkPad T480s 上の GNOME (Ubuntu) 環境を再現可能にするため
 
 | 項目 | 内容 | 根拠 |
 |---|---|---|
-| 言語/ランタイム | POSIX sh / bash / Python 3 | `t480s/t480s-settings.sh:1` は `#!/bin/bash`、`gnome-extensions/gnome-overview-toggle/gnome-overview-toggle:1` は `#!/bin/sh`、`scripts/battery-alert/battery_alert.py` / `applications/mpv-player/mpv-player.py` は `#!/usr/bin/env python3` |
+| 言語/ランタイム | POSIX sh / bash / Python 3 | `scripts/core-gnome-settings/apply-settings.sh:1` は `#!/bin/bash`、`gnome-extensions/gnome-overview-toggle/gnome-overview-toggle:1` は `#!/bin/sh`、`scripts/battery-alert/battery_alert.py` / `applications/mpv-player/mpv-player.py` は `#!/usr/bin/env python3` |
 | パッケージマネージャ（プロジェクト自体） | なし | `package.json` 等のマニフェスト不在を確認 |
 | OSパッケージマネージャ（実行対象） | apt（Ubuntu/Debian系） | `scripts/core-tools/install.sh:9,26,36,47` |
 | CI | なし | `.github/` ディレクトリ不在を確認 |
 | テスト | 手動実行（unittest / bash） | `tests/test_install.sh`、`tests/lint_shell.sh`、各 `scripts/*/tests/`、`applications/mpv-player/tests/` |
-| 対象デスクトップ環境 | GNOME Shell | `t480s/t480s-settings.sh` の `org.gnome.*` schema、`gnome-extensions/gnome-overview-toggle/gnome-overview-toggle` の `org.gnome.Shell` DBus 呼び出し |
+| 対象デスクトップ環境 | GNOME Shell | `scripts/core-gnome-settings/apply-settings.sh` の `org.gnome.*` schema、`gnome-extensions/gnome-overview-toggle/gnome-overview-toggle` の `org.gnome.Shell` DBus 呼び出し |
 | 対象ターミナルエミュレータ | Alacritty | `applications/alacritty/alacritty.toml` |
 
 OSディストリビューションは Ubuntu 24.04 LTS (Noble Numbat)。
-根拠: README.md に明記、`t480s/README.md` にも記述。
+根拠: README.md に明記。
 
 ## 主要機能（実装から確認）
 
-1. **GNOME デスクトップ設定の一括適用** — `t480s/t480s-settings.sh`
-   - アニメーション有効化（`t480s-settings.sh:6`）
-   - キーリピート速度設定（`t480s-settings.sh:14-16`）
-   - 入力ソース切り替えを Ctrl+Space に変更（`t480s-settings.sh:21`）
-   - ウィンドウ切替に Ctrl+Tab を追加、switch-panels をデフォルトにリセット（`t480s-settings.sh:27-30`）
-   - ワークスペース切替を Ctrl+1〜4 に設定（`t480s-settings.sh:35-38`）
-   - ウィンドウドラッグの修飾キーを Super から Ctrl に変更（`t480s-settings.sh:43`）
-   - フォントヒンティング/アンチエイリアス設定（`t480s-settings.sh:50-51`）
-   - バッテリー充電閾値を30%/85%に設定（`t480s-settings.sh:57-58`、`sudo` 必須）
+1. **GNOME デスクトップ設定の一括適用** — `scripts/core-gnome-settings/apply-settings.sh`
+   - アニメーション有効化（`apply-settings.sh:6`）
+   - キーリピート速度設定（`apply-settings.sh:14-16`）
+   - 入力ソース切り替えを Ctrl+Space に変更（`apply-settings.sh:21`）
+   - ウィンドウ切替に Ctrl+Tab を追加、switch-panels をデフォルトにリセット（`apply-settings.sh:27-30`）
+   - ワークスペース切替を Ctrl+1〜4 に設定（`apply-settings.sh:35-38`）
+   - ウィンドウドラッグの修飾キーを Super から Ctrl に変更（`apply-settings.sh:43`）
+   - フォントヒンティング/アンチエイリアス設定（`apply-settings.sh:50-51`）
+   - 機種不問・`sudo` 不要
+
+1a. **ThinkPad 固有: バッテリー充電閾値設定** — `scripts/core-t480s-settings/apply-settings.sh`
+   - バッテリー充電開始/停止閾値を30%/85%に設定（`apply-settings.sh:8-9`、`sudo` 必須）
+   - `thinkpad_acpi` カーネルモジュール必須（ThinkPad 専用 sysfs 属性）
 
 2. **開発・利用ツールのセットアップ** — `scripts/core-tools/install.sh`
    - 基本開発ツール一式の apt インストール（`core-tools/install.sh:9-20`）

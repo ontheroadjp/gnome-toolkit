@@ -13,9 +13,14 @@
   ],
   "commands": {
     "apply_gnome_settings": {
-      "run": "./t480s/t480s-settings.sh",
-      "evidence": "t480s/t480s-settings.sh:1 (#!/bin/bash), file mode 755",
-      "note": "Several lines use sudo (t480s/t480s-settings.sh:57-58 for battery thresholds via /sys/class/power_supply/BAT0/); not idempotent-safe to re-run blindly on a different machine model."
+      "run": "./scripts/core-gnome-settings/apply-settings.sh",
+      "evidence": "scripts/core-gnome-settings/apply-settings.sh:1 (#!/bin/bash), file mode 755",
+      "note": "Machine-agnostic gsettings only. No sudo required."
+    },
+    "apply_t480s_settings": {
+      "run": "./scripts/core-t480s-settings/apply-settings.sh",
+      "evidence": "scripts/core-t480s-settings/apply-settings.sh:1 (#!/bin/bash), file mode 755",
+      "note": "ThinkPad-specific: writes battery charge thresholds via /sys/class/power_supply/BAT0/ (requires thinkpad_acpi kernel module and sudo). Will fail on non-ThinkPad hardware."
     },
     "install_all": {
       "run": "./install.sh",
