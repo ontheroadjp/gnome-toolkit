@@ -114,7 +114,7 @@ systemd timer が定期実行する構成（常駐プロセスなし）。
 |---|---|---|
 | バッテリー検出 | `/sys/class/power_supply/BAT*` をソートして先頭を採用 | `battery_alert.py` `find_battery_path` |
 | 通知しきい値 | `.env` の `NOTIFY_THRESHOLDS`（カンマ区切り、デフォルト `50`） | `battery_alert.py` `parse_thresholds`、`.env.example` |
-| 通知タイミング | 放電中（`status == "Discharging"`）に各しきい値を初めて下回った時点で1回ずつ通知。充電に戻ると状態ファイルをクリアし、次の放電サイクルで再通知 | `battery_alert.py` `run` / `thresholds_to_notify` / `clear_state` |
+| 通知タイミング | 放電中（`status == "Discharging"`）に各しきい値を初めて下回った時点で、**最も低い**（現在容量に最も近い）しきい値のみ1回通知。同時に複数しきい値を越えた場合も通知は1件のみ（サスペンド復帰時の連続ダイアログを防止）。越えた全しきい値は状態ファイルに記録し再通知しない。充電に戻ると状態ファイルをクリアし、次の放電サイクルで再通知 | `battery_alert.py` `run` / `thresholds_to_notify` / `clear_state` |
 | 状態管理 | `/tmp` 配下の状態ファイル（`battery-alert.state`）に通知済みしきい値を保存 | `battery_alert.py` `STATE_FILE` / `save_notified_thresholds` |
 | ポーリング間隔 | `.env` の `POLL_INTERVAL`（デフォルト `120` 秒）。`battery_alert.py` 自身は読まない。`install.sh` が `battery-alert.timer` テンプレートの `__POLL_INTERVAL__` を置換して `~/.config/systemd/user/` に書き出す | `install.sh`、`.config/systemd/user/battery-alert.timer` |
 | 通知方法 | `notify-send -u critical` | `battery_alert.py` `send_notification` |

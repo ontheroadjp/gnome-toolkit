@@ -42,3 +42,8 @@ systemd timer から oneshot 起動され、バッテリー残量が設定した
 
 - `.env` の `POLL_INTERVAL` はこのスクリプト自身は読まない。`install.sh` が `battery-alert.timer` テンプレートの `__POLL_INTERVAL__` を置換して systemd timer に渡す。
 - テスト: `tests/test_battery_alert.py`（unittest, 20件）
+
+## 変更履歴（git log より自動生成）
+
+- cc21168 fix(#27): notify only the lowest crossed threshold on each poll
+- a323ddf feat(#1): rewrite battery-alert script to Python with .env-configurable thresholds and poll interval
