@@ -21,6 +21,15 @@ gsettings set org.gnome.desktop.peripherals.keyboard repeat-interval 10
 gsettings set org.gnome.desktop.wm.keybindings switch-input-source "['<Control>space']"
 
 # -----------------------------------------
+# Window switching (Ctrl+Tab, keep Alt+Tab)
+# switch-panels reset to default (Ctrl+Alt+Tab)
+# -----------------------------------------
+gsettings set org.gnome.desktop.wm.keybindings switch-windows "['<Alt>Tab', '<Control>Tab']"
+gsettings set org.gnome.desktop.wm.keybindings switch-windows-backward "['<Shift><Alt>Tab', '<Shift><Control>Tab']"
+gsettings reset org.gnome.desktop.wm.keybindings switch-panels
+gsettings reset org.gnome.desktop.wm.keybindings switch-panels-backward
+
+# -----------------------------------------
 # Change workspace
 # -----------------------------------------
 gsettings set org.gnome.desktop.wm.keybindings switch-to-workspace-1 "['<Control>1']"
