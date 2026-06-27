@@ -1,13 +1,16 @@
 #!/bin/bash
+set -Ceu
 
-set -euo pipefail
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+BIN_DIR="${HOME}/.local/bin"
+CONFIG_DIR="${HOME}/.config"
 
-REPO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-TARGET_DIR="${HOME}/.local/bin"
-TARGET_PATH="${TARGET_DIR}/mpv-player"
+mkdir -p "${BIN_DIR}" "${CONFIG_DIR}"
 
-mkdir -p "${TARGET_DIR}"
-chmod +x "${REPO_DIR}/mpv-player.py"
-ln -sf "${REPO_DIR}/mpv-player.py" "${TARGET_PATH}"
+chmod +x "${SCRIPT_DIR}/mpv-player.py"
+ln -sf "${SCRIPT_DIR}/mpv-player.py" "${BIN_DIR}/mpv-player"
 
-echo "Installed ${TARGET_PATH}"
+ln -sf "${SCRIPT_DIR}" "${CONFIG_DIR}/mpv"
+
+echo "Done: mpv-player installed"
+exit 0
