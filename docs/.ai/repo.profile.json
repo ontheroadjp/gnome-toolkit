@@ -18,9 +18,9 @@
       "note": "Several lines use sudo (t480s.sh:53-54); not idempotent-safe to re-run blindly on a different machine model."
     },
     "install_packages_and_tools": {
-      "run": "./t480s_apps.sh",
-      "evidence": "t480s_apps.sh:1 (#!/bin/bash), file mode 755",
-      "note": "Installs apt packages and several tools via curl/wget pipelines (t480s_apps.sh:60,94,123); requires sudo and network access."
+      "run": "./scripts/core-tools/install.sh",
+      "evidence": "scripts/core-tools/install.sh:1 (#!/bin/bash)",
+      "note": "Installs apt packages and tools (mise, gh, ghq, Claude Code, Codex CLI) via curl/wget pipelines; requires sudo and network access. App-specific packages (keyd, mpv, ffmpeg, yt-dlp, espanso, google-chrome) are installed by each applications/*/install.sh."
     },
     "toggle_gnome_overview": {
       "run": ".local/bin/gnome-overview-toggle",

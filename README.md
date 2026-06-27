@@ -67,8 +67,8 @@ cd ~/WORKSPACE/gnome-toolkit
 ## Usage
 
 ```bash
-# パッケージ・CLIツールのセットアップ（sudo必須、ネットワーク必須）
-./t480s/t480s-apps-install.sh
+# 汎用ツール・CLIツールのセットアップ（sudo必須、ネットワーク必須）
+./scripts/core-tools/install.sh
 
 # GNOME デスクトップ設定の適用(sudo必須の項目を含む)
 ./t480s.sh
