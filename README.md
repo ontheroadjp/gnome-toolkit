@@ -1,7 +1,9 @@
 # gnome-toolkit
 
-Ubuntu 24.04 LTS / GNOME 環境（主に Lenovo ThinkPad T480s）を再現可能にセットアップするための
-シェルスクリプト・dotfiles 集。設定値には好みが反映されているが、他の Ubuntu / GNOME 環境でも利用できる。詳細な設計意図は
+Ubuntu 24.04 LTS / GNOME 向けのシェルスクリプト・dotfiles 集。
+ハードウェア固有の設定（バッテリー充電閾値等）は `t480s/` に分離されており、
+それ以外のモジュール（アプリ設定・GNOME 拡張・スクリプト群）は
+Ubuntu / GNOME が動作する環境であれば機種を問わず利用できる。詳細な設計意図は
 [docs/L0_concept/concept.md](docs/L0_concept/concept.md) を参照。
 
 ## Features
@@ -131,7 +133,7 @@ bash scripts/vim-switch-us-input/tests/test-vim-switch-us-input.sh
 
 ## Design Principles
 
-- T480s 向けにチューニングされた設定値（キーリピート速度・バッテリー閾値等）を含むが、他の Ubuntu / GNOME 環境でも利用できる。汎用化・抽象化より明瞭さを優先する。
+- ハードウェア固有の設定（バッテリー充電閾値等）は `t480s/` に分離する。それ以外のモジュールは Ubuntu / GNOME 環境であれば機種を問わず利用できる。
 - シェルスクリプト（bash / sh）のみで構成し、専用の言語・ビルドツール・
   パッケージマネージャは導入しない。
 - パッケージ導入は OS 標準の `apt` を第一手段とし、`apt` にないものは
