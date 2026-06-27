@@ -7,7 +7,9 @@
 .
 ├── install.sh                            # 全アプリ一括インストール（per-app install.sh を呼び出す）
 ├── t480s.sh                              # GNOME desktop 設定スクリプト
-├── t480s_apps.sh                         # パッケージ/CLIツール導入スクリプト
+├── tests/                                # install.sh 動作検証テスト群
+│   ├── test_install.sh                  # install.sh の構文・参照ファイル・呼び出し構成を検証
+│   └── lint_shell.sh                    # 全 install.sh を shellcheck/bash -n で構文チェック
 ├── applications/
 │   ├── alacritty/                        # Alacritty 設定 + install.sh
 │   │   ├── alacritty.toml               # Alacritty 本体設定（→ ~/.config/alacritty/）
