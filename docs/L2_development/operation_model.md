@@ -41,23 +41,28 @@ CI が存在しないため（`.github/` 不在を確認済み）、以下はす
   `t480s.sh:56-64` のコメントに `tlp` パッケージを使う手順がメモされて
   いるが、これは実行コードではなく手動対応が必要。
 
-## 3. dotfiles のリンク配置
+## 3. dotfiles・アプリ設定のインストール
 
-`.config/alacritty/` と `.local/bin/gnome-overview-toggle` を
-`~/.config/alacritty`、`~/.local/bin/gnome-overview-toggle` として
-利用するには、シンボリックリンクを作成する。
+各アプリの設定ファイルを `~/.config/` 等へシンボリックリンクするには
+`install.sh` を使う。
 
 ```bash
-ln -s "$(pwd)/.config/alacritty" ~/.config/alacritty
-ln -s "$(pwd)/.local/bin/gnome-overview-toggle" ~/.local/bin/gnome-overview-toggle
+# 全アプリ一括インストール
+./install.sh
+
+# または個別インストール
+./applications/alacritty/install.sh      # ~/.config/alacritty → applications/alacritty/
+./applications/espanso/install.sh        # ~/.config/espanso → applications/espanso/
+./applications/mpv-player/install.sh     # ~/.config/mpv → applications/mpv-player/
+./applications/yt-dlp/install.sh         # ~/.config/yt-dlp → applications/yt-dlp/
+sudo ./applications/keyd/install.sh      # /etc/keyd → applications/keyd/ (sudo 必要)
+
+# gnome-overview-toggle（install.sh 内ではコメントアウト）
+./gnome-extensions/gnome-overview-toggle/install.sh
 ```
 
-このリンク作成コマンド自体はリポジトリのどのスクリプトにも
-含まれていない（未確認事項。
-[repository_structure.md](../L1_project/repository_structure.md) の
-未確認事項 1 を参照）。上記コマンドは実機の現在のリンク先
-（`readlink -f` で確認した実際のパス）から逆算した手順であり、
-リポジトリ内に明文化された「公式手順」ではない点に注意。
+各 `install.sh` は `SCRIPT_DIR` を起点とした絶対パスで symlink を作成するため、
+リポジトリのクローン先に依存しない。
 
 ## 4. Alacritty テーマの切り替え
 
