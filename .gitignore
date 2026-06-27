@@ -2,4 +2,4 @@
 .env
 __pycache__/
 
-root/home/user/.config/espanso/match/private.yml
+applications/espanso/match/private.yml

@@ -1,13 +1,22 @@
 #!/bin/bash
+set -Ceu
 
-set -euo pipefail
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+BIN_DIR="${HOME}/.local/bin"
+CONFIG_DIR="${HOME}/.config"
 
-REPO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-TARGET_DIR="${HOME}/.local/bin"
-TARGET_PATH="${TARGET_DIR}/espanso-toggle"
+mkdir -p "${BIN_DIR}" "${CONFIG_DIR}"
 
-mkdir -p "${TARGET_DIR}"
-chmod +x "${REPO_DIR}/espanso-toggle"
-ln -sf "${REPO_DIR}/espanso-toggle" "${TARGET_PATH}"
+chmod +x "${SCRIPT_DIR}/espanso-toggle"
+ln -sf "${SCRIPT_DIR}/espanso-toggle" "${BIN_DIR}/espanso-toggle"
 
-echo "Installed ${TARGET_PATH}"
+ln -sf "${SCRIPT_DIR}" "${CONFIG_DIR}/espanso"
+
+echo "Done: espanso installed"
+echo ""
+echo "=== Manual step: espanso ==="
+echo "Run the following to register and start espanso as a user service:"
+echo ""
+echo "  espanso service register"
+echo "  espanso service start"
+exit 0
