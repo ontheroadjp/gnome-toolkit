@@ -138,7 +138,7 @@ class TestRun(unittest.TestCase):
             mock_run.assert_not_called()
             self.assertFalse(state_file.exists())
 
-    def test_notifies_each_crossed_threshold_once(self) -> None:
+    def test_notifies_only_lowest_crossed_threshold(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
             power_supply_dir = root / "power_supply"
@@ -152,9 +152,31 @@ class TestRun(unittest.TestCase):
             with patch.object(battery_alert.subprocess, "run") as mock_run:
                 battery_alert.run(env_file, state_file, power_supply_dir)
 
-            self.assertEqual(mock_run.call_count, 2)
+            self.assertEqual(mock_run.call_count, 1)
+            self.assertIn("50%以下", mock_run.call_args[0][0][4])
             self.assertEqual(
                 battery_alert.load_notified_thresholds(state_file), {80, 50}
+            )
+
+    def test_all_crossed_thresholds_are_saved_to_state(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            power_supply_dir = root / "power_supply"
+            power_supply_dir.mkdir()
+            self._make_battery(power_supply_dir, capacity=38, status="Discharging")
+
+            env_file = root / ".env"
+            env_file.write_text("NOTIFY_THRESHOLDS=10,20,30,40,50,60,70,80\n")
+            state_file = root / "state"
+
+            with patch.object(battery_alert.subprocess, "run") as mock_run:
+                battery_alert.run(env_file, state_file, power_supply_dir)
+
+            self.assertEqual(mock_run.call_count, 1)
+            self.assertIn("40%以下", mock_run.call_args[0][0][4])
+            self.assertEqual(
+                battery_alert.load_notified_thresholds(state_file),
+                {80, 70, 60, 50, 40},
             )
 
     def test_does_not_renotify_already_notified_threshold(self) -> None:

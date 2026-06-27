@@ -107,12 +107,10 @@ def run(
     notified = load_notified_thresholds(state_file)
     to_notify = thresholds_to_notify(capacity, thresholds, notified)
 
-    for threshold in to_notify:
-        send_notification(threshold, capacity)
-        notified.add(threshold)
-
     if to_notify:
+        notified.update(to_notify)
         save_notified_thresholds(state_file, notified)
+        send_notification(to_notify[-1], capacity)
 
 
 def main() -> None:
