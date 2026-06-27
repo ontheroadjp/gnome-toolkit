@@ -1,14 +1,18 @@
 # gnome-toolkit
 
-Lenovo ThinkPad T480s (Ubuntu 24.04 LTS / GNOME) を再現可能にセットアップするための
-個人用シェルスクリプト・dotfiles 集。詳細な設計意図は
+Ubuntu 24.04 LTS / GNOME 向けのシェルスクリプト・dotfiles 集。
+ハードウェア固有の設定（バッテリー充電閾値等）は `scripts/core-t480s-settings/` に分離されており、
+それ以外のモジュール（アプリ設定・GNOME 拡張・スクリプト群）は
+Ubuntu / GNOME が動作する環境であれば機種を問わず利用できる。詳細な設計意図は
 [docs/L0_concept/concept.md](docs/L0_concept/concept.md) を参照。
 
 ## Features
 
-- `t480s/t480s-settings.sh` — GNOME デスクトップ設定（アニメーション、キーリピート、
-  入力ソース切り替え、ウィンドウ/ワークスペース切替キーバインド、フォントレンダリング、
-  バッテリー充電閾値）を `gsettings` で一括適用。
+- `scripts/core-gnome-settings/apply-settings.sh` — GNOME デスクトップ設定（アニメーション、
+  キーリピート、入力ソース切り替え、ウィンドウ/ワークスペース切替キーバインド、
+  フォントレンダリング）を `gsettings` で一括適用。機種を問わず利用可能。
+- `scripts/core-t480s-settings/apply-settings.sh` — ThinkPad 固有のバッテリー充電閾値を
+  `/sys/class/power_supply/BAT0/` 経由で設定（`thinkpad_acpi` カーネルモジュール必須）。
 - `scripts/core-tools/install.sh` — 汎用CLIツール一式（git, gh, tmux, fzf, bat,
   gocryptfs, mise+Node.js, ghq, Claude Code, Codex CLI 等）を `apt` および
   各公式インストーラ経由で導入。各アプリ固有のインストールは
@@ -70,8 +74,11 @@ sudo ./applications/keyd/install.sh  # sudo 必要
 # 汎用ツール・CLIツールのセットアップ（sudo必須、ネットワーク必須）
 ./scripts/core-tools/install.sh
 
-# GNOME デスクトップ設定の適用(sudo必須の項目を含む)
-./t480s/t480s-settings.sh
+# GNOME デスクトップ設定の適用（sudo 不要）
+./scripts/core-gnome-settings/apply-settings.sh
+
+# ThinkPad 固有: バッテリー充電閾値の設定（sudo 必須）
+./scripts/core-t480s-settings/apply-settings.sh
 
 # mpv music launcher のインストール（sudo不要）
 applications/mpv-player/install.sh
@@ -105,9 +112,9 @@ Alacritty の配色テーマを切り替えるには、
 
 - Alacritty の配色テーマは `.config/alacritty/theme/*.toml` に3種類用意されており、
   `alacritty.toml` の `import` 行で切り替える（GUIやコマンドでの切り替え機構はない）。
-- バッテリー充電のしきい値（`t480s/t480s-settings.sh` 内、30%/85%）は T480s の
-  `/sys/class/power_supply/BAT0/*` を直接書き換える。再起動後も
-  永続化したい場合は `tlp` の利用が必要（`t480s-settings.sh` 末尾のコメント参照）。
+- バッテリー充電のしきい値（`scripts/core-t480s-settings/apply-settings.sh` 内、30%/85%）は
+  T480s の `/sys/class/power_supply/BAT0/*` を直接書き換える。再起動後も
+  永続化したい場合は `tlp` の利用が必要（`core-t480s-settings/apply-settings.sh` 末尾のコメント参照）。
 - バッテリー低下通知（`scripts/battery-alert/`）のしきい値・ポーリング間隔は
   `.env` で設定する（詳細は `scripts/battery-alert/README.md` 参照）。
 - mpv music launcher（`applications/mpv-player/`）は playlist を
@@ -131,7 +138,7 @@ bash scripts/vim-switch-us-input/tests/test-vim-switch-us-input.sh
 
 ## Design Principles
 
-- 単一マシン・単一ユーザーの個人用ツールであり、汎用化・抽象化は行わない。
+- ハードウェア固有の設定（バッテリー充電閾値等）は `scripts/core-t480s-settings/` に分離する。それ以外のモジュールは Ubuntu / GNOME 環境であれば機種を問わず利用できる。
 - シェルスクリプト（bash / sh）のみで構成し、専用の言語・ビルドツール・
   パッケージマネージャは導入しない。
 - パッケージ導入は OS 標準の `apt` を第一手段とし、`apt` にないものは

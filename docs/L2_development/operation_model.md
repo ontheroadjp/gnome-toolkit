@@ -7,7 +7,7 @@ CI が存在しないため（`.github/` 不在を確認済み）、以下はす
 
 - 対象OS: Ubuntu系（`apt` が使えること）。根拠: `scripts/core-tools/install.sh:9,26,36,47` が
   すべて `sudo apt install` を呼んでいる。
-- 対象デスクトップ: GNOME Shell。根拠: `t480s/t480s-settings.sh` の `org.gnome.*` schema、
+- 対象デスクトップ: GNOME Shell。根拠: `scripts/core-gnome-settings/apply-settings.sh` の `org.gnome.*` schema、
   `gnome-extensions/gnome-overview-toggle/gnome-overview-toggle` の `org.gnome.Shell` DBus呼び出し。
 - 実行権限: 両スクリプトとも実行可能ビット付き
   （`ls -la` で `rwxrwxr-x` を確認済み）。
@@ -28,17 +28,24 @@ CI が存在しないため（`.github/` 不在を確認済み）、以下はす
 ## 2. GNOME デスクトップ設定の適用
 
 ```bash
-./t480s/t480s-settings.sh
+# 機種不問・sudo 不要
+./scripts/core-gnome-settings/apply-settings.sh
 ```
 
-- `sudo` を要求する箇所がある（バッテリー充電閾値、`t480s-settings.sh:57-58`）。
-  これは `BAT0` という `/sys/class/power_supply/` 配下のデバイス名に
-  依存しており、T480s 以外の機種やバッテリー名が異なる環境では
-  失敗する可能性がある（未確認: `BAT0` という名前が他機種でも
-  共通かどうかは本リポジトリの範囲では検証していない）。
-- バッテリー充電閾値を再起動後も永続化させたい場合は、
-  `t480s-settings.sh:60-67` のコメントに `tlp` パッケージを使う手順がメモされて
-  いるが、これは実行コードではなく手動対応が必要。
+- `gsettings set/reset` のみで構成される。`sudo` 不要。
+- GNOME が動作する Ubuntu / GNOME 環境であれば機種を問わず利用できる。
+
+ThinkPad T480s 固有のバッテリー充電閾値を設定する場合は別スクリプトを使う:
+
+```bash
+# ThinkPad 専用・sudo 必須
+./scripts/core-t480s-settings/apply-settings.sh
+```
+
+- `thinkpad_acpi` が提供する `/sys/class/power_supply/BAT0/charge_*_threshold` へ書き込む。
+  T480s 以外の機種では当該 sysfs 属性が存在しないため失敗する。
+- 設定は再起動後にリセットされる。永続化には `tlp` が必要
+  （`apply-settings.sh:12-19` のコメント参照。実行コードではない）。
 
 ## 3. dotfiles・アプリ設定のインストール
 
@@ -157,6 +164,6 @@ cd ../../scripts/voice-input && bash tests/test_voice_input.sh
 cd ../vim-switch-us-input && bash tests/test-vim-switch-us-input.sh
 ```
 
-`t480s/t480s-settings.sh` 等のテストスイートは存在せず、
+`scripts/core-gnome-settings/apply-settings.sh` 等のテストスイートは存在せず、
 動作確認は実行後に GNOME の実際の挙動を目視で確認する運用である
 （未確認: 目視確認の具体的なチェックリストはリポジトリ内に存在しない）。

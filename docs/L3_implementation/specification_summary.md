@@ -3,34 +3,42 @@
 DB・APIは存在しないため `database.md` / `api.md` は生成していない
 （生成条件: DB/APIの実装が存在する場合のみ。本リポジトリには該当実装なし）。
 
-## 1. `t480s/t480s-settings.sh` — GNOME 設定スクリプト
+## 1. `scripts/core-gnome-settings/apply-settings.sh` — GNOME 設定スクリプト
 
-全行 `gsettings set <schema> <key> <value>` の形式（一部 `sudo tee` で
-sysfs に書き込み）。設定一覧:
+全行 `gsettings set/reset <schema> <key> <value>` の形式。機種不問・`sudo` 不要。設定一覧:
 
 | schema.key | 値 | 行 |
 |---|---|---|
-| `org.gnome.desktop.interface enable-animations` | `true` | `t480s-settings.sh:6` |
-| `org.gnome.desktop.peripherals.keyboard repeat` | `true` | `t480s-settings.sh:14` |
-| `org.gnome.desktop.peripherals.keyboard delay` | `180` | `t480s-settings.sh:15` |
-| `org.gnome.desktop.peripherals.keyboard repeat-interval` | `10` | `t480s-settings.sh:16` |
-| `org.gnome.desktop.wm.keybindings switch-input-source` | `['<Control>space']` | `t480s-settings.sh:21` |
-| `org.gnome.desktop.wm.keybindings switch-windows` | `['<Alt>Tab', '<Control>Tab']` | `t480s-settings.sh:27` |
-| `org.gnome.desktop.wm.keybindings switch-windows-backward` | `['<Shift><Alt>Tab', '<Shift><Control>Tab']` | `t480s-settings.sh:28` |
-| `org.gnome.desktop.wm.keybindings switch-panels` | reset (default) | `t480s-settings.sh:29` |
-| `org.gnome.desktop.wm.keybindings switch-panels-backward` | reset (default) | `t480s-settings.sh:30` |
-| `org.gnome.desktop.wm.keybindings switch-to-workspace-1` | `['<Control>1']` | `t480s-settings.sh:35` |
-| `org.gnome.desktop.wm.keybindings switch-to-workspace-2` | `['<Control>2']` | `t480s-settings.sh:36` |
-| `org.gnome.desktop.wm.keybindings switch-to-workspace-3` | `['<Control>3']` | `t480s-settings.sh:37` |
-| `org.gnome.desktop.wm.keybindings switch-to-workspace-4` | `['<Control>4']` | `t480s-settings.sh:38` |
-| `org.gnome.desktop.wm.preferences mouse-button-modifier` | `'<Ctrl>'` | `t480s-settings.sh:43` |
-| `org.gnome.desktop.interface font-hinting` | `'full'` | `t480s-settings.sh:50` |
-| `org.gnome.desktop.interface font-antialiasing` | `'grayscale'` | `t480s-settings.sh:51` |
-| `/sys/class/power_supply/BAT0/charge_start_threshold` | `30` | `t480s-settings.sh:57` |
-| `/sys/class/power_supply/BAT0/charge_stop_threshold` | `85` | `t480s-settings.sh:58` |
+| `org.gnome.desktop.interface enable-animations` | `true` | `apply-settings.sh:6` |
+| `org.gnome.desktop.peripherals.keyboard repeat` | `true` | `apply-settings.sh:14` |
+| `org.gnome.desktop.peripherals.keyboard delay` | `180` | `apply-settings.sh:15` |
+| `org.gnome.desktop.peripherals.keyboard repeat-interval` | `10` | `apply-settings.sh:16` |
+| `org.gnome.desktop.wm.keybindings switch-input-source` | `['<Control>space']` | `apply-settings.sh:21` |
+| `org.gnome.desktop.wm.keybindings switch-windows` | `['<Alt>Tab', '<Control>Tab']` | `apply-settings.sh:27` |
+| `org.gnome.desktop.wm.keybindings switch-windows-backward` | `['<Shift><Alt>Tab', '<Shift><Control>Tab']` | `apply-settings.sh:28` |
+| `org.gnome.desktop.wm.keybindings switch-panels` | reset (default) | `apply-settings.sh:29` |
+| `org.gnome.desktop.wm.keybindings switch-panels-backward` | reset (default) | `apply-settings.sh:30` |
+| `org.gnome.desktop.wm.keybindings switch-to-workspace-1` | `['<Control>1']` | `apply-settings.sh:35` |
+| `org.gnome.desktop.wm.keybindings switch-to-workspace-2` | `['<Control>2']` | `apply-settings.sh:36` |
+| `org.gnome.desktop.wm.keybindings switch-to-workspace-3` | `['<Control>3']` | `apply-settings.sh:37` |
+| `org.gnome.desktop.wm.keybindings switch-to-workspace-4` | `['<Control>4']` | `apply-settings.sh:38` |
+| `org.gnome.desktop.wm.preferences mouse-button-modifier` | `'<Ctrl>'` | `apply-settings.sh:43` |
+| `org.gnome.desktop.interface font-hinting` | `'full'` | `apply-settings.sh:50` |
+| `org.gnome.desktop.interface font-antialiasing` | `'grayscale'` | `apply-settings.sh:51` |
 
-コメントアウトされた未採用候補（`t480s-settings.sh:47-48`）も
+コメントアウトされた未採用候補（`apply-settings.sh:47-48`）も
 ファイル内に残されている（フォント設定の別値）。
+
+## 1a. `scripts/core-t480s-settings/apply-settings.sh` — ThinkPad 固有設定スクリプト
+
+`thinkpad_acpi` カーネルモジュールが提供する sysfs 属性への書き込みのみ。`sudo` 必須。
+
+| 対象パス | 値 | 行 |
+|---|---|---|
+| `/sys/class/power_supply/BAT0/charge_start_threshold` | `30` | `apply-settings.sh:8` |
+| `/sys/class/power_supply/BAT0/charge_stop_threshold` | `85` | `apply-settings.sh:9` |
+
+設定は再起動後にリセットされる。永続化手順（`tlp` 利用）はコメントアウト（`apply-settings.sh:12-19`）。
 
 ## 2. `scripts/core-tools/install.sh` — 汎用ツール導入スクリプト
 
