@@ -6,7 +6,7 @@
 
 ## このリポジトリについて
 
-Ubuntu 24.04 LTS / GNOME 向けの個人用シェルスクリプト・dotfiles 集。
+Ubuntu 24.04 LTS / GNOME 向けのシェルスクリプト・dotfiles 集。
 ハードウェア固有設定（バッテリー充電閾値等）は `scripts/core-t480s-settings/` に分離されており、
 それ以外のモジュールは機種を問わず利用できる。CI は存在しない。
 テストは `tests/` 配下に手動実行前提で存在する。
