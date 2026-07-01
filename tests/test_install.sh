@@ -109,7 +109,8 @@ NEW_SCRIPTS_CONTENT=$(cat \
 TOOLS=(
     build-essential tmux fzf bat vim-gtk3 jq
     hyperfine rclone gocryptfs htop nethogs
-    keyd mise ghq claude codex
+    docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+    groupadd usermod keyd mise ghq claude codex
     google-chrome yt-dlp espanso ffmpeg mpv
     gnome-shell-extension-manager
 )

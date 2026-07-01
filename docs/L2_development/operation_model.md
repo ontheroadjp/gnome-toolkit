@@ -5,7 +5,7 @@ CI が存在しないため（`.github/` 不在を確認済み）、以下はす
 
 ## 前提
 
-- 対象OS: Ubuntu系（`apt` が使えること）。根拠: `scripts/core-tools/install.sh:9,26,36,47` が
+- 対象OS: Ubuntu系（`apt` が使えること）。根拠: `scripts/core-tools/install.sh:9,26,36,47,64` が
   すべて `sudo apt install` を呼んでいる。
 - 対象デスクトップ: GNOME Shell。根拠: `scripts/core-gnome-settings/apply-settings.sh` の `org.gnome.*` schema、
   `gnome-extensions/gnome-overview-toggle/gnome-overview-toggle` の `org.gnome.Shell` DBus呼び出し。
@@ -19,9 +19,13 @@ CI が存在しないため（`.github/` 不在を確認済み）、以下はす
 ```
 
 - `sudo` を要求するため対話的に実行すること。
-- `curl | sh` 形式のインストーラ（mise, Claude Code）を含むため、ネットワーク接続が必要。
+- `curl | sh` 形式のインストーラ（mise, Claude Code）と Docker/GitHub CLI/ghq の
+  repository・release 取得を含むため、ネットワーク接続が必要。
 - `command -v` で存在確認後にインストールするため、再実行しても重複インストールにはならない設計
   （mise, gh, ghq, claude, codex）。apt 系パッケージには存在チェックがなく `apt install` の冪等性に依存する。
+- Docker は公式 apt repository を登録して `docker-ce` 等を導入し、`docker` group を作成して
+  `$USER` を追加する。sudo なしで `docker` コマンドを使えるようになるのはログアウト/ログイン後、
+  または `newgrp docker` 実行後である。
 - アプリ固有のパッケージ（keyd, ffmpeg, mpv, yt-dlp, espanso, google-chrome）は
   各 `applications/*/install.sh` が担う（Section 3 参照）。
 
