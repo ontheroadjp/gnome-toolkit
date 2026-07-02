@@ -142,8 +142,9 @@ systemd timer が定期実行する構成（常駐プロセスなし）。
 | 検索結果再生 | `fzf` を開き、Enter 時点で絞り込まれている候補を `select-all+accept` で全件受け取って playlist を作成。検索語なしの場合は全候補が対象 | `mpv-player.py` `select_filtered_media_with_fzf` / `create_playlist_from_search` |
 | 前回 playlist | 既存の `mpv-player.m3u` に実エントリがある場合のみ再生へ進む | `mpv-player.py` `playlist_has_entries` / `replay_existing_playlist` |
 | 再生方法 | `mpv --playlist=<playlist>` を実行。`music` モードのみ `--no-video` を付与（`video` は映像を表示）。リピートは `--loop-playlist=inf`、ランダムは `--shuffle` を追加 | `mpv-player.py` `build_mpv_command` / `play_playlist` |
+| 削除（`-d`/`--delete`） | 通常の再生フローの代わりに fzf で複数選択させ、`Delete N file(s)? [y/N]` 確認後（`y`/`yes` 以外はキャンセル）にのみ `Path.unlink()` で即時削除（ゴミ箱は経由しない） | `mpv-player.py` `parse_args` / `confirm_deletion` / `delete_selected_files` / `run_delete` |
 | インストール | `~/.local/bin/mpv-player` を `mpv-player.py` へのシンボリックリンクとして作成 | `applications/mpv-player/install.sh` |
-| テスト | `tests/test_mpv_player.py`（`unittest`、21件） | ファイル内容確認済み |
+| テスト | `tests/test_mpv_player.py`（`unittest`、31件） | ファイル内容確認済み |
 
 ## 7. FEP 入力ソース切替（4コンポーネント構成）
 

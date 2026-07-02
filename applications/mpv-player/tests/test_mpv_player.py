@@ -180,19 +180,94 @@ class TestMpvPlayer(unittest.TestCase):
 
         self.assertEqual(exit_code, 1)
 
-    def test_parse_player_mode_accepts_music(self) -> None:
-        self.assertEqual(mpv_player.parse_player_mode(["music"]), "music")
+    def test_parse_args_accepts_music(self) -> None:
+        self.assertEqual(mpv_player.parse_args(["music"]), ("music", False))
 
-    def test_parse_player_mode_accepts_video(self) -> None:
-        self.assertEqual(mpv_player.parse_player_mode(["video"]), "video")
+    def test_parse_args_accepts_video(self) -> None:
+        self.assertEqual(mpv_player.parse_args(["video"]), ("video", False))
 
-    def test_parse_player_mode_rejects_unknown_argument(self) -> None:
+    def test_parse_args_rejects_unknown_argument(self) -> None:
         with self.assertRaises(SystemExit):
-            mpv_player.parse_player_mode(["podcast"])
+            mpv_player.parse_args(["podcast"])
 
-    def test_parse_player_mode_rejects_missing_argument(self) -> None:
+    def test_parse_args_rejects_missing_argument(self) -> None:
         with self.assertRaises(SystemExit):
-            mpv_player.parse_player_mode([])
+            mpv_player.parse_args([])
+
+    def test_parse_args_accepts_short_delete_flag(self) -> None:
+        self.assertEqual(mpv_player.parse_args(["music", "-d"]), ("music", True))
+
+    def test_parse_args_accepts_long_delete_flag_before_mode(self) -> None:
+        self.assertEqual(mpv_player.parse_args(["--delete", "video"]), ("video", True))
+
+    def test_confirm_deletion_accepts_y_case_insensitive(self) -> None:
+        with patch.object(mpv_player, "input", return_value="Y", create=True):
+            self.assertTrue(mpv_player.confirm_deletion(2))
+
+    def test_confirm_deletion_accepts_yes(self) -> None:
+        with patch.object(mpv_player, "input", return_value="yes", create=True):
+            self.assertTrue(mpv_player.confirm_deletion(2))
+
+    def test_confirm_deletion_rejects_empty_input(self) -> None:
+        with patch.object(mpv_player, "input", return_value="", create=True):
+            self.assertFalse(mpv_player.confirm_deletion(2))
+
+    def test_confirm_deletion_rejects_anything_else(self) -> None:
+        with patch.object(mpv_player, "input", return_value="n", create=True):
+            self.assertFalse(mpv_player.confirm_deletion(2))
+
+    def test_delete_selected_files_removes_files_and_returns_count(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            file_a = Path(tmp) / "a.mp3"
+            file_b = Path(tmp) / "b.mp4"
+            file_a.write_text("")
+            file_b.write_text("")
+
+            deleted_count = mpv_player.delete_selected_files([file_a, file_b])
+
+            self.assertEqual(deleted_count, 2)
+            self.assertFalse(file_a.exists())
+            self.assertFalse(file_b.exists())
+
+    def test_run_delete_deletes_selected_files_when_confirmed(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            media_dir = Path(tmp)
+            target = media_dir / "a.mp3"
+            target.write_text("")
+            completed = subprocess.CompletedProcess(
+                args=["fzf"], returncode=0, stdout="a.mp3\n"
+            )
+
+            with patch.object(mpv_player.subprocess, "run", return_value=completed):
+                with patch.object(mpv_player, "input", return_value="y", create=True):
+                    exit_code = mpv_player.run_delete(media_dir, mpv_player.MUSIC_EXTENSIONS, "music> ")
+
+            self.assertEqual(exit_code, 0)
+            self.assertFalse(target.exists())
+
+    def test_run_delete_keeps_files_when_not_confirmed(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            media_dir = Path(tmp)
+            target = media_dir / "a.mp3"
+            target.write_text("")
+            completed = subprocess.CompletedProcess(
+                args=["fzf"], returncode=0, stdout="a.mp3\n"
+            )
+
+            with patch.object(mpv_player.subprocess, "run", return_value=completed):
+                with patch.object(mpv_player, "input", return_value="n", create=True):
+                    exit_code = mpv_player.run_delete(media_dir, mpv_player.MUSIC_EXTENSIONS, "music> ")
+
+            self.assertEqual(exit_code, 1)
+            self.assertTrue(target.exists())
+
+    def test_run_delete_reports_no_files_found(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            media_dir = Path(tmp)
+
+            exit_code = mpv_player.run_delete(media_dir, mpv_player.MUSIC_EXTENSIONS, "music> ")
+
+            self.assertEqual(exit_code, 1)
 
     def test_media_extensions_by_mode_music_excludes_video_extensions(self) -> None:
         extensions = mpv_player.MEDIA_EXTENSIONS_BY_MODE[mpv_player.MODE_MUSIC]

@@ -123,6 +123,9 @@ cd ~/Videos && mpv-player video
   playlist に入れる。
 - playlist は `<cwd>/playlist/mpv-player.m3u` に上書き保存される。
 - 再生は `music` モードのみ `mpv --no-video` を付与する（`video` は映像を表示）。
+- `mpv-player <music|video> -d`（または `--delete`）は再生フローの代わりに、fzf で選択した
+  ファイルを `Delete N file(s)? [y/N]` 確認後（`y`/`yes` 以外はキャンセル）に即時削除する
+  （ゴミ箱は経由しない、不可逆）。
 
 ## 7. voice input のインストールと実行
 

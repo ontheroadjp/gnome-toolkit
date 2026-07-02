@@ -46,4 +46,17 @@ mpv-player music
 mpv-player video
 ```
 
+## ファイルの削除（`-d` / `--delete`）
+
+`-d`/`--delete` を付けると、通常の再生フローの代わりに fzf で選択したファイルを削除できる:
+
+```bash
+mpv-player music -d
+# または
+mpv-player video --delete
+```
+
+fzf で選択後 `Delete N file(s)? [y/N]` の確認が表示され、`y`/`yes`（大小文字不問）以外の
+入力（Enterのみ含む）は削除をキャンセルする。**削除は即時かつ不可逆（ゴミ箱を経由しない）** ため注意すること。
+
 > **前提:** `fzf` と `mpv` がインストール済みであること（`install.sh` が apt で導入する）。

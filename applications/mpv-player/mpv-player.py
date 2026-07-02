@@ -236,12 +236,49 @@ def replay_existing_playlist(playlist_file: Path) -> bool:
     return True
 
 
-def parse_player_mode(argv: list[str]) -> str:
+DELETE_FLAGS = ("-d", "--delete")
+CONFIRM_YES_ANSWERS = {"y", "yes"}
+
+
+def parse_args(argv: list[str]) -> tuple[str, bool]:
     prog_name = Path(sys.argv[0]).name
-    if len(argv) != 1 or argv[0] not in PLAYER_MODES:
-        print(f"Usage: {prog_name} <{MODE_MUSIC}|{MODE_VIDEO}>", file=sys.stderr)
+    delete = any(arg in DELETE_FLAGS for arg in argv)
+    positional = [arg for arg in argv if arg not in DELETE_FLAGS]
+    if len(positional) != 1 or positional[0] not in PLAYER_MODES:
+        print(
+            f"Usage: {prog_name} <{MODE_MUSIC}|{MODE_VIDEO}> [-d|--delete]",
+            file=sys.stderr,
+        )
         raise SystemExit(1)
-    return argv[0]
+    return positional[0], delete
+
+
+def confirm_deletion(count: int) -> bool:
+    answer = input(f"Delete {count} file(s)? [y/N] ").strip().lower()
+    return answer in CONFIRM_YES_ANSWERS
+
+
+def delete_selected_files(paths: list[Path]) -> int:
+    for path in paths:
+        path.unlink()
+    return len(paths)
+
+
+def run_delete(media_dir: Path, extensions: set[str], prompt: str) -> int:
+    media_files = discover_media_files(media_dir, extensions)
+    if not media_files:
+        print(f"No media files found: {media_dir}", file=sys.stderr)
+        return 1
+    selected = select_media_with_fzf(media_files, media_dir, prompt)
+    if not selected:
+        print("No files selected.", file=sys.stderr)
+        return 1
+    if not confirm_deletion(len(selected)):
+        print("Deletion cancelled.")
+        return 1
+    deleted_count = delete_selected_files(selected)
+    print(f"Deleted {deleted_count} file(s).")
+    return 0
 
 
 def run(player_mode: str) -> int:
@@ -276,7 +313,12 @@ def run(player_mode: str) -> int:
 
 
 def main() -> None:
-    player_mode = parse_player_mode(sys.argv[1:])
+    player_mode, delete = parse_args(sys.argv[1:])
+    if delete:
+        media_dir = Path.cwd()
+        extensions = MEDIA_EXTENSIONS_BY_MODE[player_mode]
+        prompt = f"{player_mode}> "
+        raise SystemExit(run_delete(media_dir, extensions, prompt))
     raise SystemExit(run(player_mode))
 
 
