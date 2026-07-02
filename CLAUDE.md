@@ -25,8 +25,8 @@ Ubuntu 24.04 LTS / GNOME 向けのシェルスクリプト・dotfiles 集。
   （バッテリー充電閾値: `apply-settings.sh:8-9`、`echo 30 | sudo tee /sys/class/power_supply/BAT0/charge_start_threshold` 等）。
   AI が自律的にこれらを実行することは想定しない。実行内容の説明・修正案の提示まではAIの役割、実行はユーザー判断。
 - `curl | sh` / `wget | sudo tee` 形式のリモートインストーラ
-  （`scripts/core-tools/install.sh:56,67-71,96`）を変更する際は、出典URLの正当性を
-  必ず確認すること。
+  （`scripts/core-tools/install.sh:56`（Docker GPGキー）, `:85`（mise）, `:96`（gh GPGキー）, `:125`（Claude Code））
+  を変更する際は、出典URLの正当性を必ず確認すること。
 - `applications/` と `gnome-extensions/` 配下の設定ファイルは、各 `install.sh` が
   ホームディレクトリ（`~/.config/`、`~/.local/bin/` 等）へのシンボリックリンクとして
   実機で使われている。これらのパス配下のファイルを編集すると、
@@ -36,7 +36,7 @@ Ubuntu 24.04 LTS / GNOME 向けのシェルスクリプト・dotfiles 集。
 
 ## Local Tooling Environment
 
-Observed by /init-docs on 2026-06-28:
+Observed by /init-docs on 2026-07-02:
 - gh: 2.95.0 (installed at /usr/bin/gh)
 - gh auth: logged in to github.com as ontheroadjp (keyring), SSH protocol
 - node: v24.16.0 (managed by mise, at ~/.local/share/mise/installs/node/24/bin/node)

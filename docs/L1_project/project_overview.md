@@ -94,6 +94,22 @@ OSディストリビューションは Ubuntu 24.04 LTS (Noble Numbat)。
     - espanso（Wayland 対応 Inject backend）でテキスト展開。
     - `applications/espanso/install.sh` が `~/.config/espanso` へのシンボリックリンクを作成。
 
+11. **Chrome CDP 専用プロファイル起動** — `applications/chrome/`
+    - `--remote-debugging-port=9222` と専用 `--user-data-dir` を付与した Google Chrome
+      ラッパー（`google-chrome-cdp`）。通常の Chrome プロファイルとは分離される。
+    - `install-all.sh:38` から呼び出される。未インストール時は Chrome の `.deb` を取得して導入する。
+
+12. **YouTube CDP ランチャー** — `applications/youtube/`
+    - `applications/chrome/` の CDP エンドポイント（`localhost:9222`）へ接続し、既存の
+      YouTube タブがあれば再利用してナビゲート、なければ `google-chrome-cdp` を新規起動する
+      （`applications/youtube/youtube`）。
+    - `install-all.sh` からは呼び出されない（個別実行が必要）。
+
+13. **search-light トリガー（US入力切替つき）** — `gnome-extensions/search-light/`
+    - `fep-switcher@local` で入力ソースを US に切り替えた後、外部の search-light GNOME 拡張の
+      オーバーレイをトグルする（`trigger-search-light`）。
+    - `install-all.sh` からは呼び出されない（個別実行が必要）。
+
 ## このプロジェクトではないもの（スコープ外であることの確認）
 
 - Web/モバイルアプリケーションではない（フレームワーク・ビルド設定が

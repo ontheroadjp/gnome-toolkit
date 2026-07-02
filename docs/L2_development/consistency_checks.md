@@ -62,7 +62,15 @@ readlink -f ~/.config/espanso
 readlink -f ~/.local/bin/gnome-overview-toggle
 readlink -f ~/.local/bin/switch-input-to-us
 readlink -f ~/.local/bin/mpv-player
+readlink -f ~/.local/bin/google-chrome-cdp
+readlink -f ~/.local/bin/youtube
+readlink -f ~/.local/bin/trigger-search-light
 ```
+
+`applications/youtube/install.sh` と `gnome-extensions/search-light/install.sh` は
+`tests/test_install.sh` の検証対象に含まれていない（`grep -n "youtube\|search-light" tests/test_install.sh` で
+該当行なしを確認済み。`chrome/install.sh` は検証対象に含まれる: `tests/test_install.sh:20,65-66,85,107`）。
+これら2スクリプトの正当性は目視確認に依存する（未確認: 自動テストでの検証手段はリポジトリ内に存在しない）。
 
 期待される出力はそれぞれ `<このリポジトリの絶対パス>/applications/alacritty` 等。
 

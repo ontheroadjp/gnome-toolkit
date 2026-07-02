@@ -125,7 +125,7 @@ systemd timer が定期実行する構成（常駐プロセスなし）。
 | 状態管理 | `/tmp` 配下の状態ファイル（`battery-alert.state`）に通知済みしきい値を保存 | `battery_alert.py` `STATE_FILE` / `save_notified_thresholds` |
 | ポーリング間隔 | `.env` の `POLL_INTERVAL`（デフォルト `120` 秒）。`battery_alert.py` 自身は読まない。`install.sh` が `battery-alert.timer` テンプレートの `__POLL_INTERVAL__` を置換して `~/.config/systemd/user/` に書き出す | `install.sh`、`.config/systemd/user/battery-alert.timer` |
 | 通知方法 | `notify-send -u critical` | `battery_alert.py` `send_notification` |
-| テスト | `tests/test_battery_alert.py`（`unittest`、19件） | ファイル内容確認済み |
+| テスト | `tests/test_battery_alert.py`（`unittest`、20件） | ファイル内容確認済み |
 
 ## 6. `applications/mpv-player/` — mpv music/video launcher
 
@@ -218,3 +218,36 @@ Ubuntu 24.04 / GNOME (Wayland) での Typinator 相当のテキスト展開。
 | `config/default.yml` | espanso 本体設定 | `backend: Inject`（Wayland 環境で採用。`show_icon: false`、`show_notifications: false`） |
 | `match/base.yml` | テキスト展開ルール | `@@1975` トリガー（実際のメールアドレスはローカルで書き換える。プレースホルダー `your-email@example.com` で管理） |
 | `match/private.yml` | プライベートトリガー | メールアドレス等を含む。gitignore 対象（`private.yml.example` からコピーして作成） |
+
+## 10. `applications/chrome/` — Chrome CDP 専用プロファイル起動
+
+| 項目 | 内容 | 根拠 |
+|---|---|---|
+| 起動オプション | `--remote-debugging-port=9222`、`--user-data-dir=~/.config/google-chrome-cdp`、`--class=google-chrome-cdp` を付与して `google-chrome-stable` を起動 | `google-chrome-cdp:6-10` |
+| デスクトップ分離 | `CHROME_DESKTOP=google-chrome-cdp.desktop` を export し、通常の Chrome デスクトップエントリと区別する | `google-chrome-cdp:5` |
+| インストール | 未インストール時は `wget` で `.deb` を取得し `sudo apt install` する。`~/.local/bin/google-chrome-cdp`・`~/.local/share/applications/google-chrome-cdp.desktop` へシンボリックリンクを作成 | `install.sh:8-13,26-27` |
+| 呼び出し元 | ルート `install-all.sh:38` から自動実行される | `install-all.sh:38` |
+| テスト | `tests/test_install.sh:20,65-66,85,107` で install.sh の構文・参照ファイルを検証（機能テストではない） | ファイル内容確認済み |
+
+## 11. `applications/youtube/` — YouTube CDP ランチャー
+
+| 項目 | 内容 | 根拠 |
+|---|---|---|
+| 役割 | CDP（`http://localhost:9222`）経由で YouTube タブを開閉・再利用する CLI | `youtube:1-81` |
+| CDP未接続時 | `google-chrome-cdp` を `disown` 付きバックグラウンドで新規起動（2箇所: CDP自体が未起動の場合と、CDPは起動済みだが対象タブが見つからない場合） | `youtube:13-17`, `youtube:78-81` |
+| タブ再利用 | `curl` で `/json` を取得し `youtube.com` を含む `page` タイプのタブを検索、見つかれば WebSocket 経由で `Page.navigate` を送信して遷移 | `youtube:19-77` |
+| WebSocketフレーム送受信 | 外部ライブラリを使わず、インラインの Python で HTTP Upgrade ハンドシェイクとフレーム組み立てを直接実装（マスクキーは全ゼロ固定） | `youtube:30-76` |
+| 検索キーワード | 引数があれば `urllib.parse.quote` でエンコードし `youtube.com/results?search_query=` へ | `youtube:6-11` |
+| インストール | `~/.local/bin/youtube`・`~/.local/share/applications/youtube.desktop` へシンボリックリンクを作成 | `install.sh` |
+| 呼び出し元 | ルート `install-all.sh` からは呼び出されない（個別実行が必要） | `install-all.sh` に該当行なしを確認済み |
+| 既知の制限 | `google-chrome-cdp` の呼び出しが、`$HOME` 展開ではなく特定ユーザーのホームディレクトリを含む絶対パスでハードコードされている（2箇所、詳細は該当行を参照）。このリポジトリを別ユーザーがクローンした場合、ホームディレクトリが異なると当該パスは存在せず失敗する。他のスクリプトが採用する `SCRIPT_DIR`/`$HOME` 起点の相対解決とは異なる実装 | `youtube:14`, `youtube:79` |
+
+## 12. `gnome-extensions/search-light/` — search-light トリガー
+
+| 項目 | 内容 | 根拠 |
+|---|---|---|
+| 役割 | 入力ソースを US に切り替えてから search-light 拡張のオーバーレイをトグルする | `trigger-search-light:1-15` |
+| 手順 | (1) `gdbus` で `fep-switcher@local` の `SwitchToUs()` を呼ぶ (2) 50ms 待機 (3) `gdbus` で `org.gnome.Shell.Eval` を呼び `searchLight._toggle_search_light()` を実行 | `trigger-search-light:3-15` |
+| 前提 | `fep-switcher@local`（本リポジトリ内、`scripts/fep-switcher/`）と、外部の search-light GNOME 拡張（本リポジトリ外で別途インストール）の両方が有効であること | `README.md`（`gnome-extensions/search-light/README.md`） |
+| インストール | `~/.local/bin/trigger-search-light` へシンボリックリンクを作成するのみ。GNOME カスタムキーバインド登録はユーザーが手動で行う | `install.sh` |
+| 呼び出し元 | ルート `install-all.sh` からは呼び出されない（個別実行が必要） | `install-all.sh` に該当行なしを確認済み |
